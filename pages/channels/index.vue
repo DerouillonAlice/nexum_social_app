@@ -9,8 +9,7 @@ const { request, logout } = useAPI()
 const { data: channels, pending, error, refresh } = await useAsyncData('channels', () => 
   request('/channels'), {
     transform: (data) => {
-      return data['hydra:member'] || data
-    }
+        return data.member || data['hydra:member'] || []    }
   }
 )
 
