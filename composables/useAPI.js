@@ -1,7 +1,6 @@
 export const useAPI = () => {
   const config = useRuntimeConfig()
-  const token = useCookie('token', { maxAge: 60 * 60 * 24 * 7 }) 
-  const user = useState('user', () => null) 
+  const authStore = useAuthStore() 
 
   const request = async (url, options = {}) => {
     const baseURL = options.ignoreSlug 
@@ -13,8 +12,8 @@ export const useAPI = () => {
       ...options.headers
     }
 
-    if (token.value) {
-      headers.Authorization = `Bearer ${token.value}`
+    if (authStore.token) {
+      headers.Authorization = `Bearer ${authStore.token}`
     }
 
     return await $fetch(url, {
@@ -23,14 +22,12 @@ export const useAPI = () => {
       ...options,
       async onResponseError({ response }) {
         if (response.status === 401) {
-          token.value = null
-          user.value = null
+          authStore.clearAuth()
           navigateTo('/login')
         }
       }
     })
   }
-
 
   const login = async (email, password) => {
     const data = await request('/login', {
@@ -40,28 +37,16 @@ export const useAPI = () => {
     })
     
     if (data.token) {
-        token.value = data.token
-        await fetchUser()
+       authStore.token = data.token 
+       const user = await request('/users/me')
+       authStore.setAuth(data.token, user)
     }
   }
 
-  const fetchUser = async () => {
-    if (!token.value) return
-    user.value = await request('/users/me')
-  }
-
   const logout = () => {
-    token.value = null
-    user.value = null
+    authStore.clearAuth()
     navigateTo('/login')
   }
 
-  return {
-    token,
-    user,
-    request,
-    login,
-    logout,
-    fetchUser
-  }
+  return { request, login, logout }
 }
