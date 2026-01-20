@@ -8,7 +8,7 @@ export const useAPI = () => {
       : `${config.public.apiBaseUrl}/${config.public.slug}`
 
     const headers = {
-      Accept: 'application/json',
+      Accept: 'application/ld+json',
       ...options.headers
     }
 
