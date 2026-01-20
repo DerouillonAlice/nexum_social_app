@@ -65,11 +65,11 @@ const formatDate = (dateString) => {
       </div>
 
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink 
-          v-for="channel in channels" 
-          :key="channel.id"
-          :to="`/channels/${channel.id}`"
-          class="group bg-slate-900 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800 p-5 rounded-xl transition duration-200 flex flex-col h-full"
+    <NuxtLink 
+  v-for="channel in channels" 
+  :key="channel.id"
+  :to="`/channels/${channel.slug}`" 
+  class="group bg-slate-900 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800 p-5 rounded-xl transition duration-200 flex flex-col h-full"
         >
           <div class="flex justify-between items-start mb-3">
             <span class="text-2xl">💬</span>
