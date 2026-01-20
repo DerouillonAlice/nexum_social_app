@@ -49,5 +49,21 @@ export const useAPI = () => {
     navigateTo('/login')
   }
 
-  return { request, login, logout }
+  const register = async (email, password, displayName) => {
+    const code = config.public.registrationCode || '' 
+    
+    await request('/register', {
+      method: 'POST',
+      body: { 
+        email, 
+        password, 
+        displayName,
+        codeInscription: code 
+      },
+      ignoreSlug: true 
+    })
+  }
+
+  return { request, login, logout, register }
+
 }
