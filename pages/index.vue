@@ -37,11 +37,6 @@ const isMe = (authorIri) => {
     return authorId === myId
 }
 
-const getAvatar = (authorIri) => {
-    const name = getUserName(authorIri)
-    return `https://i.pravatar.cc/150?u=${name}`
-}
-
 const formatDate = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)
@@ -80,7 +75,7 @@ const onCommentAdded = () => {
           <article v-for="post in posts" :key="post.id" class="bg-[#151725] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition shadow-lg shadow-black/20 cursor-pointer" @click="selectedPost = post">
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
-                <img class="h-10 w-10 rounded-full" :src="getAvatar(post.author)" :alt="getUserName(post.author)">
+                <UserAvatar :user="post.author" sizeClass="h-10 w-10" />
                 <div>
                   <h3 class="text-base font-semibold text-white flex items-center gap-2">
                     {{ getUserName(post.author) }}
