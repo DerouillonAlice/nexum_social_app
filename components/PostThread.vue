@@ -23,11 +23,6 @@ const isMe = (authorIri) => {
     return authorId === myId
 }
 
-const getAvatar = (authorIri) => {
-    const name = getUserName(authorIri)
-    return `https://i.pravatar.cc/150?u=${name}`
-}
-
 const formatDate = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)
@@ -121,7 +116,7 @@ watch(() => props.post, () => {
             <h3 class="text-lg font-bold text-white mb-2">Fil de discussion</h3>
              <div class="flex justify-between items-start mb-3">
               <div class="flex items-center gap-3">
-                <img class="h-8 w-8 rounded-full" :src="getAvatar(post.author)" :alt="getUserName(post.author)">
+                <UserAvatar :user="post.author" sizeClass="h-8 w-8" />
                 <div>
                   <h3 class="text-sm font-semibold text-white flex items-center gap-2">
                     {{ getUserName(post.author) }}
@@ -143,12 +138,11 @@ watch(() => props.post, () => {
               class="flex gap-3 w-full"
               :class="[isMe(comment.author) ? 'flex-row-reverse' : 'flex-row']"
             >
-                <img 
+                <UserAvatar 
                   v-if="!isMe(comment.author)"
-                  class="h-8 w-8 rounded-full mt-1 shrink-0" 
-                  :src="getAvatar(comment.author)" 
-                  :alt="getUserName(comment.author)"
-                >
+                  :user="comment.author" 
+                  sizeClass="h-8 w-8 mt-1" 
+                />
                 <div 
                   class="flex flex-col max-w-[85%]"
                   :class="[isMe(comment.author) ? 'items-end' : 'items-start']"

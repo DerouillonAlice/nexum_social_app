@@ -55,7 +55,7 @@ const logout = () => {
                   @click="toggleMenu"
                   class="flex items-center gap-2 cursor-pointer focus:outline-none p-1 rounded-lg hover:bg-white/5 transition-colors"
                 >
-                    <img class="h-8 w-8 rounded-full border border-white/10" :src="user.avatar" :alt="user.name">
+                    <UserAvatar :user="user" sizeClass="h-8 w-8" />
                     <span class="text-sm font-medium text-white hidden md:block">{{ user.name }}</span>
                     <svg 
                       class="h-4 w-4 text-slate-500 transition-transform duration-200"
