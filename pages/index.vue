@@ -10,7 +10,8 @@ const fetchPosts = async () => {
   try {
     const data = await request('/publications', {
         query: {
-            'order[createdAt]': 'desc'
+            'order[createdAt]': 'desc',
+            'exists[parent]': 'false'
         }
     })
     posts.value = data.member || data['hydra:member'] || []
@@ -53,13 +54,19 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString()
 }
 
-const comments = [
-  {
-    id: 1,
-    author: { name: 'Alice', avatar: 'https://i.pravatar.cc/150?u=alice' },
-    content: 'Super post !'
+const comments = ref([])
+const newComment = ref('')
+const isSendingComment = ref(false)
+
+watch(selectedPost, () => {
+}, { immediate: true })
+
+const onCommentAdded = () => {
+  if (selectedPost.value) {
+     if (!selectedPost.value.comments) selectedPost.value.comments = []
+     selectedPost.value.comments.push({ id: 'temp_' + Date.now() }) 
   }
-]
+}
 </script>
 
 <template>
@@ -107,56 +114,14 @@ const comments = [
       </div>
 
       <aside v-if="selectedPost" class="w-80 p-6 overflow-y-auto hidden xl:flex flex-col bg-[#12141f]">
-        <div class="mb-6 pb-6 border-b border-white/5">
-            <h3 class="text-lg font-bold text-white mb-2">Fil de discussion</h3>
-             <div class="flex justify-between items-start mb-3">
-              <div class="flex items-center gap-3">
-                <img class="h-8 w-8 rounded-full" :src="getAvatar(selectedPost.author)" :alt="getUserName(selectedPost.author)">
-                <div>
-                  <h3 class="text-sm font-semibold text-white flex items-center gap-2">
-                    {{ getUserName(selectedPost.author) }}
-                    <span v-if="isMe(selectedPost.author)" class="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
-                  </h3>
-                   <span class="text-[10px] text-slate-500">{{ formatDate(selectedPost.createdAt) }}</span>
-                </div>
-              </div>
-            </div>
-            <p class="text-slate-300 text-xs mb-3 line-clamp-3">
-              {{ selectedPost.body }}
-            </p>
-        </div>
-
-        <div class="flex-1 overflow-y-auto space-y-6 mb-4 pr-2">
-            <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
-                <img class="h-8 w-8 rounded-full mt-1" :src="comment.author.avatar" :alt="comment.author.name">
-                <div>
-                   <h4 class="text-xs font-bold text-white mb-1">{{ comment.author.name }}</h4>
-                   <div class="bg-white/5 p-3 rounded-tr-xl rounded-b-xl rounded-tl-sm text-xs text-slate-300">
-                     {{ comment.content }}
-                   </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-auto">
-             <div class="relative">
-                <input type="text" 
-                  class="w-full bg-[#0f111a] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
-                  :placeholder="`Répondre à ${getUserName(selectedPost.author).split(' ')[0]}...`"
-                >
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-md transition">
-                    <svg class="h-4 w-4 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    </svg>
-                </button>
-             </div>
-        </div>
+         <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
       </aside>
     </template>
 
+
     <template v-else>
        <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-6">
+          <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-purple-600 mb-6">
             L'espace de travail du futur
           </h1>
           <p class="text-xl text-slate-400 max-w-2xl mb-10">
