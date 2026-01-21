@@ -30,17 +30,58 @@ export const useAPI = () => {
     })
   }
 
-  const login = async (email, password) => {
+const login = async (email, password) => {
     const data = await request('/login', {
       method: 'POST',
       body: { email, password },
-      ignoreSlug: true 
+      ignoreSlug: true
     })
     
-    if (data.token) {
-       authStore.token = data.token 
-       const user = await request('/users/me')
-       authStore.setAuth(data.token, user)
+    authStore.setToken(data.token)
+
+    try {
+      const userList = await request('/users', { 
+        query: { email: email },
+        ignoreSlug: true 
+      })
+      
+      console.log('Login: users found for email', email, userList)
+
+      let myProfile = null
+      let page = 1
+      let searchActive = true
+
+      const firstPageResults = userList.member || userList['hydra:member'] || []
+      myProfile = firstPageResults.find(u => u.email === email)
+
+      let nextLink = userList.view?.next || userList['hydra:view']?.['hydra:next']
+      
+      while (!myProfile && searchActive && nextLink) {
+          page++
+          try {
+            console.log(`Login: searching profile on page ${page}...`)
+            const nextPage = await request('/users', { 
+               ignoreSlug: true,
+               query: { page: page }
+            })
+            const nextResults = nextPage.member || nextPage['hydra:member'] || []
+            myProfile = nextResults.find(u => u.email === email)
+            
+            nextLink = nextPage.view?.next || nextPage['hydra:view']?.['hydra:next']
+            if (!nextLink) searchActive = false
+          } catch (err) {
+            console.error("Erreur pagination login", err)
+            searchActive = false
+          }
+      }
+
+      console.log('Login: selected profile', myProfile)
+      
+      if (myProfile) {
+        authStore.setAuth(data.token, myProfile) 
+      } 
+    } catch (e) {
+      console.error("Erreur récupération profil", e)
     }
   }
 
