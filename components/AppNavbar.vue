@@ -10,12 +10,10 @@ const props = defineProps({
 <template>
   <header class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#0f111a] flex-shrink-0 z-10 sticky top-0">
     <div class="flex items-center gap-12 w-full max-w-7xl mx-auto">
-      <!-- Logo -->
       <NuxtLink to="/" class="flex items-center w-64">
         <img src="~/assets/img/logo.png" alt="Nexum Logo" class="h-8 w-auto">
       </NuxtLink>
 
-      <!-- Search -->
       <div class="flex-1 max-w-xl relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,7 +27,6 @@ const props = defineProps({
         >
       </div>
 
-      <!-- Right Header -->
       <div class="flex items-center justify-end w-64 gap-6">
         <template v-if="user">
             <button class="text-slate-400 hover:text-white relative">
