@@ -1,7 +1,7 @@
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: null,
-    user: null, 
+    token: useCookie('auth_token').value || null,
+    user: useCookie('auth_user').value || null, 
   }),
   actions: {
     setToken(newToken) {
