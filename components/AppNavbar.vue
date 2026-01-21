@@ -5,20 +5,6 @@ const props = defineProps({
     default: null
   }
 })
-
-const authStore = useAuthStore()
-const isMenuOpen = ref(false)
-
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
-}
-
-const logout = () => {
-  authStore.clearAuth()
-  navigateTo('/login')
-  isMenuOpen.value = false
-}
-
 </script>
 
 <template>
@@ -28,18 +14,7 @@ const logout = () => {
         <img src="~/assets/img/logo.png" alt="Nexum Logo" class="h-8 w-auto">
       </NuxtLink>
 
-      <div class="flex-1 max-w-xl relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <input 
-          type="text" 
-          class="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg leading-5 bg-white/5 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-white/10 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
-          placeholder="Rechercher une discussion, un collègue..."
-        >
-      </div>
+      <SearchBar />
 
       <div class="flex items-center justify-end w-64 gap-6">
         <template v-if="user">
@@ -50,32 +25,7 @@ const logout = () => {
             </svg>
             </button>
             
-            <div class="relative">
-                <button 
-                  @click="toggleMenu"
-                  class="flex items-center gap-2 cursor-pointer focus:outline-none p-1 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                    <UserAvatar :user="user" sizeClass="h-8 w-8" />
-                    <span class="text-sm font-medium text-white hidden md:block">{{ user.name }}</span>
-                    <svg 
-                      class="h-4 w-4 text-slate-500 transition-transform duration-200"
-                      :class="{'rotate-180': isMenuOpen}" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                
-                <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-[#1a1d2d] border border-white/10 rounded-lg shadow-xl z-50 py-1 overflow-hidden">
-                    <a href="#" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors">Paramètres</a>
-                    <div class="border-t border-white/5 my-1"></div>
-                    <button @click="logout" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-colors">
-                        Se déconnecter
-                    </button>
-                </div>
-            </div>
+            <UserMenu :user="user" />
         </template>
         <template v-else>
              <NuxtLink to="/login" class="text-slate-400 hover:text-white text-sm font-medium">Se connecter</NuxtLink>
