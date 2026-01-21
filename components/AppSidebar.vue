@@ -10,12 +10,12 @@
         Fil d'actualité
       </NuxtLink>
 
-      <a href="#" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md">
+      <NuxtLink to="/channels" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md" active-class="bg-blue-500/10 text-blue-400">
         <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         Explorer
-      </a>
+      </NuxtLink>
 
       <a href="#" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md">
         <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
