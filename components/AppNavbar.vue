@@ -50,10 +50,6 @@ const logout = () => {
             </svg>
             </button>
             
-            <button class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-            Crée post +
-            </button>
-
             <div class="relative">
                 <button 
                   @click="toggleMenu"
