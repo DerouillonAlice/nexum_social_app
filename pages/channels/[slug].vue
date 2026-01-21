@@ -15,10 +15,11 @@ const { data: channel } = await useAsyncData(`channel-${channelSlug}`, () =>
 
 onMounted(async () => {
   await fetchUsers() 
-  await fetchMessages(channelSlug)
-  scrollToBottom()
-  
-  pollingInterval = setInterval(() => fetchMessages(channelSlug), 3000)
+  if (channel.value) {
+    await fetchMessages(channel.value)
+    scrollToBottom()
+    pollingInterval = setInterval(() => fetchMessages(channel.value), 3000)
+  }
 })
 
 let pollingInterval
@@ -39,7 +40,7 @@ const isMe = (messageAuthorIri) => {
 const newMessage = ref('')
 const messagesContainer = ref(null)
 const handleSend = async () => {
-  if (await sendMessage(channelSlug, newMessage.value)) {
+  if (channel.value && await sendMessage(channel.value, newMessage.value)) {
     newMessage.value = ''
     scrollToBottom()
   }

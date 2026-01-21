@@ -6,16 +6,47 @@ export const useMessages = () => {
   const isLoading = ref(false)
   const isSending = ref(false)
 
-  const fetchMessages = async (channelSlug) => {
+  const fetchMessages = async (channel) => {
     isLoading.value = true
     try {
+      let filter = {}
+      if (typeof channel === 'string') {
+          if (channel.includes('/')) {
+              filter['channel'] = channel
+          } else {
+              filter['channel.slug'] = channel
+          }
+      } else if (channel && (channel['@id'] || channel.id)) {
+           filter['channel'] = channel['@id'] || channel.id
+      }
+      
       const data = await request('/publications', {
         query: { 
-          'channel.slug': channelSlug, 
+          ...filter,
           'order[createdAt]': 'asc' 
         } 
       })
-      messages.value = data.member || data['hydra:member'] || []
+
+      const rawMessages = data.member || data['hydra:member'] || []
+      
+      const targetChannelId = (typeof channel === 'object' ? (channel['@id'] || channel.id) : filter['channel'] || filter['channel.slug'])
+      
+      messages.value = rawMessages.filter(msg => {
+          if (!msg.channel) return false
+          const msgChannelId = typeof msg.channel === 'object' ? (msg.channel['@id'] || msg.channel.id) : msg.channel
+          
+          if (filter['channel.slug']) {
+              if (typeof msg.channel === 'object' && msg.channel.slug) {
+                  return msg.channel.slug === filter['channel.slug']
+              }
+          }
+          
+          if (targetChannelId && msgChannelId) {
+             return targetChannelId === msgChannelId || msgChannelId.endsWith(targetChannelId) || targetChannelId.endsWith(msgChannelId)
+          }
+          
+          return true
+      })
     } catch (e) {
       console.error("Erreur chargement messages", e)
     } finally {
@@ -23,13 +54,21 @@ export const useMessages = () => {
     }
   }
 
-  const sendMessage = async (channelSlug, content) => {
+  const sendMessage = async (channel, content) => {
     if (!content.trim() || isSending.value) return false
 
     isSending.value = true
     try {
-
-      const channelIRI = `/api/${config.public.slug}/channels/${channelSlug}`
+      let channelIRI = ''
+      if (typeof channel === 'string') {
+         if (channel.includes('/')) {
+             channelIRI = channel
+         } else {
+             channelIRI = `/api/${config.public.slug}/channels/${channel}`
+         }
+      } else if (channel && (channel['@id'] || channel.id)) {
+          channelIRI = channel['@id'] || channel.id
+      }
 
       await request('/publications', {
         method: 'POST',
@@ -40,7 +79,7 @@ export const useMessages = () => {
         }
       })
       
-      await fetchMessages(channelSlug)
+      await fetchMessages(channel)
       return true 
     } catch (e) {
       return false
