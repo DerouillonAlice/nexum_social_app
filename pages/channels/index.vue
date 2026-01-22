@@ -19,6 +19,44 @@ const formatDate = (dateString) => {
     day: 'numeric', month: 'short'
   })
 }
+
+const showModal = ref(false)
+const isCreating = ref(false)
+const errorMessage = ref('')
+const newChannel = ref({ name: '', description: '' })
+
+const createChannel = async () => {
+  if (!newChannel.value.name.trim()) return
+
+  // Check for duplicates locally
+  const normalizedName = newChannel.value.name.toLowerCase().trim()
+  const exists = channels.value?.some(c => c.name.toLowerCase().trim() === normalizedName)
+  
+  if (exists) {
+      errorMessage.value = "Un salon portant ce nom existe déjà."
+      return
+  }
+  
+  errorMessage.value = ''
+  isCreating.value = true
+  try {
+     await request('/channels', {
+      method: 'POST',
+      body: { 
+          name: newChannel.value.name,
+          description: newChannel.value.description
+      }
+    })
+    showModal.value = false
+    newChannel.value = { name: '', description: ''}
+    refresh()
+  } catch (e) {
+    console.error(e)
+    errorMessage.value = "Une erreur est survenue lors de la création."
+  } finally {
+    isCreating.value = false
+  }
+}
 </script>
 
 <template>
@@ -29,9 +67,14 @@ const formatDate = (dateString) => {
       <div class="max-w-5xl mx-auto">
         <div class="flex justify-between items-end mb-6">
             <h2 class="text-2xl font-bold text-white">Salons disponibles</h2>
-            <button @click="refresh" class="text-sm text-blue-400 hover:underline cursor-pointer">
-            Actualiser
-            </button>
+            <div class="flex items-center gap-4">
+              <button @click="refresh" class="text-sm text-blue-400 hover:underline cursor-pointer">
+              Actualiser
+              </button>
+              <button @click="showModal = true" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition shadow-lg shadow-blue-500/20">
+                + Nouveau salon
+              </button>
+            </div>
         </div>
 
         <div v-if="pending" class="flex justify-center py-20">
@@ -48,11 +91,10 @@ const formatDate = (dateString) => {
         </div>
 
         <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <NuxtLink 
+            <div 
             v-for="channel in channels" 
             :key="channel.id"
-            :to="`/channels/${channel.slug}`" 
-            class="group bg-slate-900 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800 p-5 rounded-xl transition duration-200 flex flex-col h-full"
+            class="group bg-slate-900 border border-slate-800 hover:border-slate-700 p-5 rounded-xl transition duration-200 flex flex-col h-full"
             >
             <div class="flex justify-between items-start mb-3">
                 <span class="text-2xl">💬</span>
@@ -69,14 +111,50 @@ const formatDate = (dateString) => {
                 {{ channel.description || "Pas de description" }}
             </p>
 
-            <div class="flex items-center text-sm text-blue-500 font-medium">
-                Rejoindre
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+            <div class="flex items-center gap-2 mt-4">
+                <NuxtLink 
+                  :to="`/channels/${channel.slug}`"
+                  class="flex-1 text-center py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition"
+                >
+                  Voir
+                </NuxtLink>
             </div>
-            </NuxtLink>
+            </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Create Channel Modal -->
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click.self="showModal = false">
+      <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative">
+        <button class="absolute top-4 right-4 text-slate-500 hover:text-white" @click="showModal = false">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        
+        <h3 class="text-xl font-bold text-white mb-6">Créer un nouveau salon</h3>
+        
+        <form @submit.prevent="createChannel" class="space-y-4">
+            <div v-if="errorMessage" class="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+                {{ errorMessage }}
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Nom du salon</label>
+              <input v-model="newChannel.name" type="text" class="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition" placeholder="ex: Général" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Description</label>
+              <textarea v-model="newChannel.description" rows="3" class="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition" placeholder="De quoi parle ce salon ?"></textarea>
+            </div>
+            
+            <div class="flex justify-end pt-2">
+                <button type="button" @click="showModal = false" class="px-4 py-2 text-slate-400 hover:text-white mr-2">Annuler</button>
+                <button type="submit" :disabled="isCreating" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition flex items-center gap-2">
+                  <span v-if="isCreating" class="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                  Créer le salon
+                </button>
+            </div>
+        </form>
       </div>
     </div>
   </div>

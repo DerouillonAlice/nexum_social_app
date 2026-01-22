@@ -2,21 +2,38 @@
 const authStore = useAuthStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
+const { fetchChannels, getChannel } = useChannels()
 
 const posts = ref([])
 const selectedPost = ref(null)
 
 const fetchPosts = async () => {
   try {
+    const query = {
+        'order[createdAt]': 'desc',
+        'exists[parent]': 'false'
+    }
+
     const data = await request('/publications', {
-        query: {
-            'order[createdAt]': 'desc',
-            'exists[parent]': 'false'
-        }
+      query: {
+        'order[createdAt]': 'desc',
+        'exists[parent]': 'false'
+      }
     })
     posts.value = data.member || data['hydra:member'] || []
+
+    posts.value = posts.value.slice().sort((a, b) => {
+      const ta = a && a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const tb = b && b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return tb - ta
+    })
+
     if (posts.value.length > 0) {
-      selectedPost.value = posts.value[0]
+      if (!selectedPost.value || !posts.value.some(p => (p.id && selectedPost.value.id && p.id === selectedPost.value.id) || (p['@id'] && selectedPost.value['@id'] && p['@id'] === selectedPost.value['@id']))) {
+        selectedPost.value = posts.value[0]
+      }
+    } else {
+      selectedPost.value = null
     }
   } catch (e) {
     console.error(e)
@@ -26,7 +43,8 @@ const fetchPosts = async () => {
 onMounted(async () => {
     if (authStore.user) {
         await fetchUsers()
-        await fetchPosts()
+        await fetchChannels()
+    await fetchPosts()
     }
 })
 
@@ -81,7 +99,15 @@ const onCommentAdded = () => {
                     {{ getUserName(post.author) }}
                     <span v-if="isMe(post.author)" class="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
                   </h3>
-                  <span class="text-xs text-slate-500">{{ formatDate(post.createdAt) }}</span>
+                  <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span>{{ formatDate(post.createdAt) }}</span>
+                    <span v-if="post.channel" class="flex items-center gap-1">
+                       • dans 
+                       <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium" @click.stop>
+                         {{ getChannel(post.channel).name }}
+                       </NuxtLink>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,8 +138,6 @@ const onCommentAdded = () => {
          <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
       </aside>
     </template>
-
-
     <template v-else>
        <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
           <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-purple-600 mb-6">

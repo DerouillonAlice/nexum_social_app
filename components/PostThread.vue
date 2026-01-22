@@ -11,6 +11,7 @@ const emit = defineEmits(['comment-added'])
 const authStore = useAuthStore()
 const { request } = useAPI()
 const { getUserName } = useUsers()
+const { getChannel } = useChannels()
 
 const comments = ref([])
 const newComment = ref('')
@@ -122,7 +123,12 @@ watch(() => props.post, () => {
                     {{ getUserName(post.author) }}
                     <span v-if="isMe(post.author)" class="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
                   </h3>
-                   <span class="text-[10px] text-slate-500">{{ formatDate(post.createdAt) }}</span>
+                   <div class="flex items-center gap-2 text-[10px] text-slate-500">
+                      <span>{{ formatDate(post.createdAt) }}</span>
+                      <span v-if="post.channel">
+                        • <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors">{{ getChannel(post.channel).name }}</NuxtLink>
+                      </span>
+                   </div>
                 </div>
               </div>
             </div>
