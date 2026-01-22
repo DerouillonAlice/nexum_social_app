@@ -1,6 +1,5 @@
 <script setup>
 const { request } = useAPI()
-const channelStore = useChannelStore()
 
 const { data: channels } = await useAsyncData('sidebar-channels', () => 
   request('/channels'), {
@@ -8,10 +7,7 @@ const { data: channels } = await useAsyncData('sidebar-channels', () =>
   }
 )
 
-const followedChannels = computed(() => {
-    if (!channels.value) return []
-    return channels.value.filter(c => channelStore.isFollowing(c))
-})
+const followedChannels = computed(() => channels.value || [])
 </script>
 
 <template>

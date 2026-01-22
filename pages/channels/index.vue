@@ -4,7 +4,6 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
-const channelStore = useChannelStore()
 const { request } = useAPI()
 
 const { data: channels, pending, error, refresh } = await useAsyncData('channels', () => 
@@ -113,21 +112,12 @@ const createChannel = async () => {
             </p>
 
             <div class="flex items-center gap-2 mt-4">
-                 <NuxtLink 
-                    :to="`/channels/${channel.slug}`"
-                    class="flex-1 text-center py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition"
-                 >
-                    Voir
-                 </NuxtLink>
-                 <button 
-                    @click.prevent="channelStore.toggle(channel)"
-                    class="flex-1 text-center py-2 rounded-lg text-sm font-medium transition border"
-                    :class="channelStore.isFollowing(channel) 
-                        ? 'bg-transparent border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-500/50' 
-                        : 'bg-blue-600 border-blue-600 text-white hover:bg-blue-500 hover:border-blue-500'"
-                 >
-                    {{ channelStore.isFollowing(channel) ? 'Suivi' : 'Rejoindre' }}
-                 </button>
+                <NuxtLink 
+                  :to="`/channels/${channel.slug}`"
+                  class="flex-1 text-center py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition"
+                >
+                  Voir
+                </NuxtLink>
             </div>
             </div>
         </div>
