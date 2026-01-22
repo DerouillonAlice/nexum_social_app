@@ -1,11 +1,17 @@
 <script setup>
 const { request } = useAPI()
+const channelStore = useChannelStore()
 
 const { data: channels } = await useAsyncData('sidebar-channels', () => 
   request('/channels'), {
     transform: (data) => data.member || data['hydra:member'] || []
   }
 )
+
+const followedChannels = computed(() => {
+    if (!channels.value) return []
+    return channels.value.filter(c => channelStore.isFollowing(c))
+})
 </script>
 
 <template>
@@ -40,9 +46,12 @@ const { data: channels } = await useAsyncData('sidebar-channels', () =>
 
     <div class="mt-8">
       <h3 class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Vos Espaces</h3>
+      <div v-if="followedChannels.length === 0" class="px-3 text-sm text-slate-600 italic">
+        Aucun espace suivi.
+      </div>
       <div class="space-y-1">
           <NuxtLink 
-            v-for="channel in channels" 
+            v-for="channel in followedChannels" 
             :key="channel.id" 
             :to="`/channels/${channel.slug}`"
             class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md"
@@ -52,12 +61,12 @@ const { data: channels } = await useAsyncData('sidebar-channels', () =>
             {{ channel.name }}
           </NuxtLink>
 
-          <a href="#" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md mt-4">
+          <NuxtLink to="/channels" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md mt-4">
             <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Créer un espace
-          </a>
+            Rejoindre un espace
+          </NuxtLink>
       </div>
     </div>
   </nav>

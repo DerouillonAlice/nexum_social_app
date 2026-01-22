@@ -9,7 +9,7 @@ const { request } = useAPI()
 const { messages, isLoading, isSending, fetchMessages, sendMessage } = useMessages()
 const { fetchUsers, getUserName } = useUsers() 
 
-const { data: channel } = await useAsyncData(`channel-${channelSlug}`, () => 
+const { data: channel, error: channelError } = await useAsyncData(`channel-${channelSlug}`, () => 
   request(`/channels/${channelSlug}`)
 )
 
@@ -62,6 +62,21 @@ watch(messages, () => scrollToBottom())
     <AppSidebar />
     
     <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-950 text-slate-200">
+      
+      <div v-if="channelError" class="flex-1 flex flex-col items-center justify-center text-center p-6">
+          <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4">
+               <svg class="w-12 h-12 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+               </svg>
+               <h3 class="text-xl font-bold text-white mb-2">Erreur lors du chargement du salon</h3>
+               <p class="text-slate-400 max-w-md">Impossible d'accéder au salon "<strong>{{ channelSlug }}</strong>".<br/>Il a peut-être été supprimé ou plusieurs salons portent le même identifiant.</p>
+          </div>
+          <NuxtLink to="/channels" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition font-medium">
+             Retour aux salons
+          </NuxtLink>
+      </div>
+
+      <template v-else>
       <header class="flex-none border-b border-slate-800 bg-slate-900/50 p-4 flex items-center gap-3 shadow-sm z-10">
         <NuxtLink to="/channels" class="text-slate-400 hover:text-white transition md:hidden">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -122,6 +137,7 @@ watch(messages, () => scrollToBottom())
           </button>
         </form>
       </footer>
+      </template>
     </div>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 const authStore = useAuthStore()
+const channelStore = useChannelStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
 const { fetchChannels, getChannel } = useChannels()
@@ -9,14 +10,33 @@ const selectedPost = ref(null)
 
 const fetchPosts = async () => {
   try {
-    const data = await request('/publications', {
-        query: {
-            'order[createdAt]': 'desc',
-            'exists[parent]': 'false'
-        }
-    })
-    posts.value = data.member || data['hydra:member'] || []
-    if (posts.value.length > 0) {
+    const query = {
+        'order[createdAt]': 'desc',
+        'exists[parent]': 'false'
+    }
+
+    if (channelStore.followed.length > 0) {
+        query['channel[]'] = channelStore.followed
+    } else {
+        posts.value = []
+        selectedPost.value = null
+        return
+    }
+
+    const data = await request('/publications', { query })
+    const rawPosts = data.member || data['hydra:member'] || []
+    
+    if (channelStore.followed.length > 0) {
+        posts.value = rawPosts.filter(post => {
+            if (!post.channel) return false
+            const postChannelId = typeof post.channel === 'object' ? (post.channel['@id'] || post.channel.id) : post.channel
+            return channelStore.isFollowing(postChannelId)
+        })
+    } else {
+        posts.value = rawPosts
+    }
+
+    if (posts.value.length > 0 && !selectedPost.value) {
       selectedPost.value = posts.value[0]
     }
   } catch (e) {
@@ -123,6 +143,17 @@ const onCommentAdded = () => {
       </aside>
     </template>
 
+    <template v-else-if="authStore.user && channelStore.followed.length === 0">
+       <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
+          <h2 class="text-3xl font-bold text-white mb-4">Bienvenue sur Nexum</h2>
+          <p class="text-slate-400 max-w-md mb-8">
+            Pour commencer à voir des messages ici, vous devez rejoindre des salons qui vous intéressent.
+          </p>
+          <NuxtLink to="/channels" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition">
+            Parcourir les salons
+          </NuxtLink>
+       </div>
+    </template>
 
     <template v-else>
        <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
