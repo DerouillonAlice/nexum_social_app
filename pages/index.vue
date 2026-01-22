@@ -25,7 +25,7 @@ const fetchPosts = async () => {
 
     const data = await request('/publications', { query })
     const rawPosts = data.member || data['hydra:member'] || []
-    
+
     if (channelStore.followed.length > 0) {
         posts.value = rawPosts.filter(post => {
             if (!post.channel) return false
@@ -36,8 +36,18 @@ const fetchPosts = async () => {
         posts.value = rawPosts
     }
 
-    if (posts.value.length > 0 && !selectedPost.value) {
-      selectedPost.value = posts.value[0]
+    posts.value = posts.value.slice().sort((a, b) => {
+      const ta = a && a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const tb = b && b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return tb - ta
+    })
+
+    if (posts.value.length > 0) {
+      if (!selectedPost.value || !posts.value.some(p => (p.id && selectedPost.value.id && p.id === selectedPost.value.id) || (p['@id'] && selectedPost.value['@id'] && p['@id'] === selectedPost.value['@id']))) {
+        selectedPost.value = posts.value[0]
+      }
+    } else {
+      selectedPost.value = null
     }
   } catch (e) {
     console.error(e)
