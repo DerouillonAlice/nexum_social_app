@@ -6,10 +6,9 @@ const isUpdating = ref(false)
 const errorMsg = ref('')
 const successMsg = ref('')
 
+// Form fields
 const displayName = ref(authStore.user?.displayName || '')
-const currentPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
+const biographie = ref(authStore.user?.biographie || '')
 
 const handleUpdateProfile = async () => {
   if (isUpdating.value) return
@@ -17,18 +16,9 @@ const handleUpdateProfile = async () => {
   errorMsg.value = ''
   successMsg.value = ''
 
+  // Validation
   if (!displayName.value.trim()) {
     errorMsg.value = 'Le nom d\'affichage est requis'
-    return
-  }
-
-  if (newPassword.value && newPassword.value !== confirmPassword.value) {
-    errorMsg.value = 'Les mots de passe ne correspondent pas'
-    return
-  }
-
-  if (newPassword.value && newPassword.value.length < 6) {
-    errorMsg.value = 'Le mot de passe doit contenir au moins 6 caractères'
     return
   }
 
@@ -37,22 +27,22 @@ const handleUpdateProfile = async () => {
   try {
     const userId = authStore.user['@id'] || authStore.user.id
     const updateData = {
-      displayName: displayName.value
+      displayName: displayName.value,
+      biographie: biographie.value
     }
 
-    if (newPassword.value) {
-      updateData.password = newPassword.value
+    console.log('Sending update:', updateData)
+    const response = await updateUser(userId, updateData)
+    console.log('Update response:', response)
+
+    // Update local auth store
+    authStore.user = { 
+      ...authStore.user, 
+      displayName: displayName.value,
+      biographie: biographie.value
     }
-
-    await updateUser(userId, updateData)
-
-    authStore.user = { ...authStore.user, displayName: displayName.value }
 
     successMsg.value = 'Profil mis à jour avec succès'
-    
-    currentPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
   } catch (e) {
     console.error('Update error:', e)
     errorMsg.value = 'Erreur lors de la mise à jour du profil'
@@ -81,37 +71,19 @@ const handleUpdateProfile = async () => {
         />
       </div>
 
-      <div class="pt-4 border-t border-white/5">
-        <h3 class="text-lg font-semibold text-white mb-4">Changer le mot de passe</h3>
-        <p class="text-sm text-slate-400 mb-4">Laissez vide si vous ne souhaitez pas changer votre mot de passe</p>
-
-        <div class="space-y-4">
-          <div>
-            <label for="newPassword" class="block text-sm font-medium text-slate-300 mb-2">
-              Nouveau mot de passe
-            </label>
-            <input
-              id="newPassword"
-              v-model="newPassword"
-              type="password"
-              :disabled="isUpdating"
-              class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-            />
-          </div>
-
-          <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-slate-300 mb-2">
-              Confirmer le mot de passe
-            </label>
-            <input
-              id="confirmPassword"
-              v-model="confirmPassword"
-              type="password"
-              :disabled="isUpdating"
-              class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-            />
-          </div>
-        </div>
+      <!-- Biography -->
+      <div>
+        <label for="biographie" class="block text-sm font-medium text-slate-300 mb-2">
+          Biographie
+        </label>
+        <textarea
+          id="biographie"
+          v-model="biographie"
+          rows="4"
+          :disabled="isUpdating"
+          placeholder="Parlez-nous de vous..."
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50 resize-none"
+        ></textarea>
       </div>
 
       <div v-if="errorMsg" class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
