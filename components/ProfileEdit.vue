@@ -1,8 +1,9 @@
 <script setup>
 const authStore = useAuthStore()
-const { updateUser } = useAPI()
+const { updateUser, uploadMedia } = useAPI()
 
 const isUpdating = ref(false)
+const isUploadingAvatar = ref(false)
 const errorMsg = ref('')
 const successMsg = ref('')
 
@@ -13,6 +14,58 @@ const prenom = ref(authStore.user?.prenom || '')
 const nom = ref(authStore.user?.nom || '')
 const dateAnniversaire = ref(authStore.user?.dateAnniversaire?.split('T')[0] || '')
 const biographie = ref(authStore.user?.biographie || '')
+
+const selectedAvatar = ref(null)
+const avatarPreview = ref(null)
+
+const currentAvatar = computed(() => {
+  if (avatarPreview.value) return avatarPreview.value
+  
+  const avatar = authStore.user?.avatar
+  if (!avatar) return null
+  
+  if (typeof avatar === 'object' && avatar.contentUrl) {
+    return avatar.contentUrl
+  }
+  
+  return null
+})
+
+const handleAvatarSelect = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    errorMsg.value = 'Veuillez sélectionner une image'
+    return
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    errorMsg.value = 'L\'image ne doit pas dépasser 5 Mo'
+    return
+  }
+
+  selectedAvatar.value = file
+  errorMsg.value = ''
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    avatarPreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+// Watch for user data changes and update form fields
+watch(() => authStore.user, (newUser) => {
+  if (newUser) {
+    email.value = newUser.email || ''
+    displayName.value = newUser.displayName || ''
+    prenom.value = newUser.prenom || ''
+    nom.value = newUser.nom || ''
+    dateAnniversaire.value = newUser.dateAnniversaire?.split('T')[0] || ''
+    biographie.value = newUser.biographie || ''
+  }
+}, { immediate: true, deep: true })
 
 const handleUpdateProfile = async () => {
   if (isUpdating.value) return
@@ -48,6 +101,22 @@ const handleUpdateProfile = async () => {
       updateData.dateAnniversaire = new Date(dateAnniversaire.value).toISOString()
     }
 
+    // Upload avatar if selected
+    if (selectedAvatar.value) {
+      try {
+        isUploadingAvatar.value = true
+        const mediaResponse = await uploadMedia(selectedAvatar.value)
+        const mediaIri = mediaResponse['@id'] || mediaResponse.id
+        updateData.avatar = mediaIri
+      } catch (uploadError) {
+        console.error('Avatar upload error:', uploadError)
+        errorMsg.value = 'Erreur lors de l\'upload de l\'avatar (bug backend connu). Le reste du profil sera mis à jour.'
+        // Continue with profile update even if avatar fails
+      } finally {
+        isUploadingAvatar.value = false
+      }
+    }
+
     console.log('Sending update:', updateData)
     const response = await updateUser(userId, updateData)
     console.log('Update response:', response)
@@ -59,6 +128,8 @@ const handleUpdateProfile = async () => {
     }
 
     successMsg.value = 'Profil mis à jour avec succès'
+    selectedAvatar.value = null
+    avatarPreview.value = null
   } catch (e) {
     console.error('Update error:', e)
     errorMsg.value = 'Erreur lors de la mise à jour du profil'
@@ -73,6 +144,42 @@ const handleUpdateProfile = async () => {
     <h2 class="text-xl font-bold text-white mb-6">Modifier mon profil</h2>
 
     <form @submit.prevent="handleUpdateProfile" class="space-y-6">
+      <!-- Avatar Section -->
+      <div class="flex flex-col items-center gap-4 pb-6 border-b border-white/5">
+        <div class="relative">
+          <div class="w-32 h-32 rounded-full overflow-hidden bg-slate-800 border-4 border-slate-700">
+            <img 
+              v-if="currentAvatar" 
+              :src="currentAvatar" 
+              alt="Avatar" 
+              class="w-full h-full object-cover"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center text-4xl text-slate-500">
+              {{ displayName[0]?.toUpperCase() || '?' }}
+            </div>
+          </div>
+          <div v-if="isUploadingAvatar" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+            <LoadingSpinner />
+          </div>
+        </div>
+
+        <div class="text-center">
+          <label class="cursor-pointer">
+            <span class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition inline-block">
+              {{ selectedAvatar ? 'Changer l\'image' : 'Choisir un avatar' }}
+            </span>
+            <input 
+              type="file" 
+              accept="image/*"
+              @change="handleAvatarSelect"
+              :disabled="isUpdating"
+              class="hidden"
+            />
+          </label>
+          <p class="text-xs text-slate-500 mt-2">Max 5 Mo</p>
+        </div>
+      </div>
+
       <!-- Email -->
       <div>
         <label for="email" class="block text-sm font-medium text-slate-300 mb-2">

@@ -163,6 +163,22 @@ const login = async (email, password) => {
     })
   }
 
-  return { request, login, logout, register, uploadMedia, updateUser }
+  const getCurrentUser = async () => {
+    const userId = authStore.user?.['@id'] || authStore.user?.id
+    if (!userId) return null
+
+    const id = typeof userId === 'string' && userId.includes('/')
+      ? userId.split('/').pop()
+      : userId
+
+    const user = await request(`/users/${id}`, {
+      ignoreSlug: true
+    })
+
+    authStore.user = user
+    return user
+  }
+
+  return { request, login, logout, register, uploadMedia, updateUser, getCurrentUser }
 
 }

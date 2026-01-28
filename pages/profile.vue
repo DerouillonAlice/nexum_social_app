@@ -2,6 +2,15 @@
 definePageMeta({ middleware: 'auth' })
 
 const authStore = useAuthStore()
+const { getCurrentUser } = useAPI()
+
+onMounted(async () => {
+  try {
+    await getCurrentUser()
+  } catch (e) {
+    console.error('Error loading user profile:', e)
+  }
+})
 </script>
 
 <template>
