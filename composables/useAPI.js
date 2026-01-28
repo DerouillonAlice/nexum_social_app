@@ -105,6 +105,64 @@ const login = async (email, password) => {
     })
   }
 
-  return { request, login, logout, register }
+  const uploadMedia = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const baseURL = `${config.public.apiBaseUrl}/${config.public.slug}`
+    
+    const headers = {
+      Accept: 'application/ld+json'
+    }
+
+    if (authStore.token) {
+      headers.Authorization = `Bearer ${authStore.token}`
+    }
+
+    return await $fetch('/media', {
+      baseURL,
+      method: 'POST',
+      body: formData,
+      headers,
+      async onResponseError({ response }) {
+        if (response.status === 401) {
+          authStore.clearAuth()
+          navigateTo('/login')
+        }
+      }
+    })
+  }
+
+  const updateUser = async (userId, data) => {
+    const id = typeof userId === 'string' && userId.includes('/')
+      ? userId.split('/').pop()
+      : userId
+
+    const baseURL = config.public.apiBaseUrl
+    
+    const headers = {
+      'Content-Type': 'application/merge-patch+json',
+      'Accept': 'application/ld+json'
+    }
+
+    if (authStore.token) {
+      headers.Authorization = `Bearer ${authStore.token}`
+    }
+
+    return await $fetch(`/users/${id}`, {
+      baseURL,
+      method: 'PATCH',
+      body: data,
+      headers,
+      async onResponseError({ response }) {
+        if (response.status === 401) {
+          authStore.clearAuth()
+          navigateTo('/login')
+        }
+      }
+    })
+  }
+
+  return { request, login, logout, register, uploadMedia, updateUser }
 
 }
