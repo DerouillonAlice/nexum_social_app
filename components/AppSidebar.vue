@@ -1,11 +1,16 @@
 <script setup>
 const { request } = useAPI()
 
-const { data: channels } = await useAsyncData('sidebar-channels', () => 
-  request('/channels'), {
-    transform: (data) => data.member || data['hydra:member'] || []
+const channels = ref([])
+
+onMounted(async () => {
+  try {
+    const data = await request('/channels')
+    channels.value = data.member || data['hydra:member'] || []
+  } catch (e) {
+    console.error('Error loading channels:', e)
   }
-)
+})
 
 const followedChannels = computed(() => channels.value || [])
 </script>
@@ -36,6 +41,13 @@ const followedChannels = computed(() => channels.value || [])
         </svg>
         Notifications
       </a>
+
+      <NuxtLink to="/profile" class="group flex items-center px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-md" active-class="bg-blue-500/10 !text-blue-400">
+        <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        Mon profil
+      </NuxtLink>
 
 
     </div>
