@@ -12,7 +12,7 @@ const handleSubmit = async () => {
 
   try {
     await login(email.value, password.value);
-    navigateTo("/channels");
+    navigateTo("/");
   } catch (e) {
     errorMsg.value = "Impossible de se connecter. Vérifiez vos identifiants.";
     console.error(e);

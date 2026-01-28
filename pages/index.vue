@@ -6,6 +6,7 @@ const { fetchChannels, getChannel } = useChannels()
 
 const posts = ref([])
 const selectedPost = ref(null)
+const isLoading = ref(false)
 
 const fetchPosts = async () => {
   try {
@@ -42,11 +43,14 @@ const fetchPosts = async () => {
 
 onMounted(async () => {
     if (authStore.user) {
+        isLoading.value = true
         await fetchUsers()
         await fetchChannels()
-    await fetchPosts()
+        await fetchPosts()
+        isLoading.value = false
     }
 })
+
 
 const isMe = (authorIri) => {
     if (!authStore.user || !authorIri) return false
@@ -89,6 +93,8 @@ const onCommentAdded = () => {
       
       <div class="flex-1 overflow-y-auto px-6 py-6 border-r border-white/5 relative">
         <div class="max-w-3xl mx-auto space-y-6">
+          
+          <LoadingSpinner v-if="isLoading" />
           
           <article v-for="post in posts" :key="post.id" class="bg-[#151725] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition shadow-lg shadow-black/20 cursor-pointer" @click="selectedPost = post">
             <div class="flex justify-between items-start mb-4">

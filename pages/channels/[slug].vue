@@ -13,12 +13,17 @@ const { data: channel, error: channelError } = await useAsyncData(`channel-${cha
   request(`/channels/${channelSlug}`)
 )
 
+const isInitialLoading = ref(true)
+
 onMounted(async () => {
   await fetchUsers() 
   if (channel.value) {
     await fetchMessages(channel.value)
+    isInitialLoading.value = false
     scrollToBottom()
     pollingInterval = setInterval(() => fetchMessages(channel.value), 3000)
+  } else {
+    isInitialLoading.value = false
   }
 })
 
@@ -92,7 +97,9 @@ watch(messages, () => scrollToBottom())
 
       <main ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
         
-        <div v-if="messages.length === 0" class="text-center py-20 opacity-50">
+        <LoadingSpinner v-if="isInitialLoading || isLoading" />
+        
+        <div v-else-if="messages.length === 0" class="text-center py-20 opacity-50">
           <p>C'est calme... Trop calme.</p>
         </div>
 
