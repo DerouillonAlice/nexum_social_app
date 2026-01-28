@@ -7,6 +7,14 @@ const {
   handleSearch, 
   clearSearch 
 } = useSearch()
+
+// Extract numeric ID from user object
+const getUserId = (user) => {
+  if (user['@id']) {
+    return user['@id'].split('/').pop()
+  }
+  return user.id
+}
 </script>
 
 <template>
@@ -34,15 +42,16 @@ const {
             <div v-else class="py-2">
                 <div v-if="searchResults.users.length > 0" class="mb-2">
                     <h4 class="px-4 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</h4>
-                    <button 
+                    <NuxtLink 
                         v-for="user in searchResults.users" 
-                        :key="user.id" 
+                        :key="user.id"
+                        :to="`/profile/${getUserId(user)}`"
                         class="w-full text-left px-4 py-2 hover:bg-white/5 flex items-center gap-3 transition-colors"
                         @click="clearSearch"
                     >
                         <UserAvatar :user="user" sizeClass="h-6 w-6" />
                         <span class="text-sm text-slate-200">{{ user.displayName || user.username }}</span>
-                    </button>
+                    </NuxtLink>
                 </div>
 
                 <div v-if="searchResults.channels.length > 0" class="mb-2">
