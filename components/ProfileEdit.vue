@@ -7,7 +7,11 @@ const errorMsg = ref('')
 const successMsg = ref('')
 
 // Form fields
+const email = ref(authStore.user?.email || '')
 const displayName = ref(authStore.user?.displayName || '')
+const prenom = ref(authStore.user?.prenom || '')
+const nom = ref(authStore.user?.nom || '')
+const dateAnniversaire = ref(authStore.user?.dateAnniversaire?.split('T')[0] || '')
 const biographie = ref(authStore.user?.biographie || '')
 
 const handleUpdateProfile = async () => {
@@ -22,13 +26,26 @@ const handleUpdateProfile = async () => {
     return
   }
 
+  if (!email.value.trim() || !email.value.includes('@')) {
+    errorMsg.value = 'Email valide requis'
+    return
+  }
+
   isUpdating.value = true
 
   try {
     const userId = authStore.user['@id'] || authStore.user.id
     const updateData = {
+      email: email.value,
       displayName: displayName.value,
+      prenom: prenom.value,
+      nom: nom.value,
       biographie: biographie.value
+    }
+
+    // Add date only if provided
+    if (dateAnniversaire.value) {
+      updateData.dateAnniversaire = new Date(dateAnniversaire.value).toISOString()
     }
 
     console.log('Sending update:', updateData)
@@ -38,8 +55,7 @@ const handleUpdateProfile = async () => {
     // Update local auth store
     authStore.user = { 
       ...authStore.user, 
-      displayName: displayName.value,
-      biographie: biographie.value
+      ...updateData
     }
 
     successMsg.value = 'Profil mis à jour avec succès'
@@ -57,6 +73,22 @@ const handleUpdateProfile = async () => {
     <h2 class="text-xl font-bold text-white mb-6">Modifier mon profil</h2>
 
     <form @submit.prevent="handleUpdateProfile" class="space-y-6">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-slate-300 mb-2">
+          Email
+        </label>
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          required
+          :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+        />
+      </div>
+
+      <!-- Display Name -->
       <div>
         <label for="displayName" class="block text-sm font-medium text-slate-300 mb-2">
           Nom d'affichage
@@ -66,6 +98,48 @@ const handleUpdateProfile = async () => {
           v-model="displayName"
           type="text"
           required
+          :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+        />
+      </div>
+
+      <!-- First Name -->
+      <div>
+        <label for="prenom" class="block text-sm font-medium text-slate-300 mb-2">
+          Prénom
+        </label>
+        <input
+          id="prenom"
+          v-model="prenom"
+          type="text"
+          :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+        />
+      </div>
+
+      <!-- Last Name -->
+      <div>
+        <label for="nom" class="block text-sm font-medium text-slate-300 mb-2">
+          Nom
+        </label>
+        <input
+          id="nom"
+          v-model="nom"
+          type="text"
+          :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+        />
+      </div>
+
+      <!-- Birthday -->
+      <div>
+        <label for="dateAnniversaire" class="block text-sm font-medium text-slate-300 mb-2">
+          Date d'anniversaire
+        </label>
+        <input
+          id="dateAnniversaire"
+          v-model="dateAnniversaire"
+          type="date"
           :disabled="isUpdating"
           class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
         />
