@@ -7,7 +7,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <nav class="w-64 p-6 overflow-y-auto hidden md:block border-r border-white/5 h-full bg-[#0f111a]">
+  <nav class="w-64 p-6 overflow-y-auto hidden md:block border-r border-white/5 bg-[#0f111a]" style="height: 100%;">
     <div class="space-y-1">
       <h3 class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Menu</h3>
 

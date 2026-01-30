@@ -123,21 +123,22 @@ const filteredPosts = computed(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-1 overflow-hidden">
+  <div class="flex overflow-hidden bg-[#0f111a] text-white" style="height: calc(100vh - 4rem);">
     <template v-if="authStore.user">
       <AppSidebar />
 
-      <div class="flex-1 overflow-y-auto px-6 py-6 border-r border-white/5 relative">
-        <div class="max-w-3xl mx-auto space-y-6">
+      <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative">
+        <div class="max-w-3xl mx-auto space-y-8">
 
           <LoadingSpinner v-if="isLoading" />
 
-          <PublicationComposer :show-channel-selector="true" @posted="fetchPosts" class="mb-8" />
+          <PublicationComposer :show-channel-selector="true" @posted="fetchPosts" class="mb-10" />
 
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-white">Publications</h2>
-            <button @click="showFavoritesOnly = !showFavoritesOnly" class="text-sm px-3 py-1.5 rounded-lg transition"
-              :class="showFavoritesOnly ? 'bg-yellow-500/20 text-yellow-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white">Publications</h2>
+            <button @click="showFavoritesOnly = !showFavoritesOnly"
+              class="text-sm px-4 py-2 rounded-lg transition font-medium"
+              :class="showFavoritesOnly ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'">
               {{ showFavoritesOnly ? '★ Favoris uniquement' : '☆ Tout afficher' }}
             </button>
           </div>
@@ -150,7 +151,8 @@ const filteredPosts = computed(() => {
           </div>
 
           <article v-for="post in filteredPosts" :key="post.id"
-            class="bg-[#151725] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition shadow-lg shadow-black/20 cursor-pointer"
+            class="bg-[#151725] rounded-2xl p-8 border border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/20 cursor-pointer"
+            :class="selectedPost?.id === post.id ? 'border-blue-500/50 ring-2 ring-blue-500/20' : ''"
             @click="selectedPost = post">
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
@@ -223,9 +225,40 @@ const filteredPosts = computed(() => {
         </div>
       </div>
 
-      <aside v-if="selectedPost" class="w-80 p-6 overflow-y-auto hidden xl:flex flex-col bg-[#12141f]">
-        <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+      <aside v-if="selectedPost"
+        class="hidden xl:flex flex-col w-[28rem] overflow-hidden border-l border-white/5 bg-[#12141f] transition-all duration-300">
+        <div
+          class="border-b border-white/5 p-6 flex items-center justify-between bg-[#0f111a]/50 backdrop-blur-sm sticky top-0 z-10">
+          <h3 class="font-semibold text-lg text-white">Commentaires</h3>
+          <button @click="selectedPost = null"
+            class="p-2 hover:bg-white/5 rounded-lg transition text-slate-400 hover:text-white">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+        </div>
       </aside>
+
+      <!-- Modal commentaires mobile -->
+      <div v-if="selectedPost"
+        class="xl:hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center"
+        @click="selectedPost = null">
+        <div class="bg-[#12141f] w-full sm:max-w-2xl sm:rounded-t-2xl max-h-[80vh] overflow-y-auto" @click.stop>
+          <div class="sticky top-0 bg-[#12141f] border-b border-white/5 p-4 flex justify-between items-center">
+            <h3 class="font-semibold">Commentaires</h3>
+            <button @click="selectedPost = null" class="p-2 hover:bg-white/5 rounded-lg transition">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+        </div>
+      </div>
+
     </template>
     <template v-else>
       <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
