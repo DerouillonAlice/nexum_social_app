@@ -98,11 +98,27 @@ export const useMessages = () => {
     }
   }
 
+  const deletePublication = async (publication) => {
+    const pubId = publication.id || publication['@id']?.split('/').pop()
+    if (!pubId) return false
+    
+    try {
+      await request(`/publications/${pubId}`, {
+        method: 'DELETE'
+      })
+      return true
+    } catch (e) {
+      console.error('Error deleting publication', e)
+      return false
+    }
+  }
+
   return {
     messages,
     isLoading,
     isSending,
     fetchMessages,
-    sendMessage
+    sendMessage,
+    deletePublication
   }
 }

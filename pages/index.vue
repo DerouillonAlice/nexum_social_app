@@ -2,11 +2,26 @@
 const authStore = useAuthStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
-const { fetchChannels, getChannel } = useChannels()
+const { fetchChannels, getChannel, isFavorite, favoriteChannels } = useChannels()
+const { deletePublication } = useMessages()
 
 const posts = ref([])
 const selectedPost = ref(null)
 const isLoading = ref(false)
+const showFavoritesOnly = ref(true)
+const openMenuId = ref(null)
+
+const handleDeletePost = async (post) => {
+  if (!confirm('Supprimer cette publication ?')) return
+  const success = await deletePublication(post)
+  if (success) {
+    posts.value = posts.value.filter(p => p.id !== post.id)
+    if (selectedPost.value?.id === post.id) {
+      selectedPost.value = null
+    }
+  }
+  openMenuId.value = null
+}
 
 const fetchPosts = async () => {
   try {
@@ -84,6 +99,27 @@ const onCommentAdded = () => {
     selectedPost.value.comments.push({ id: 'temp_' + Date.now() })
   }
 }
+
+const getChannelId = (post) => {
+  if (!post.channel) return null
+  if (typeof post.channel === 'object') {
+    return post.channel.id || post.channel['@id']?.split('/').pop()
+  }
+  return String(post.channel).split('/').pop()
+}
+
+const filteredPosts = computed(() => {
+  if (!showFavoritesOnly.value || favoriteChannels.value.length === 0) {
+    return posts.value
+  }
+
+  const favoriteIds = new Set(favoriteChannels.value.map(c => String(c.id)))
+
+  return posts.value.filter(post => {
+    const channelId = getChannelId(post)
+    return channelId && favoriteIds.has(channelId)
+  })
+})
 </script>
 
 <template>
@@ -98,7 +134,22 @@ const onCommentAdded = () => {
 
           <PublicationComposer :show-channel-selector="true" @posted="fetchPosts" class="mb-8" />
 
-          <article v-for="post in posts" :key="post.id"
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Publications</h2>
+            <button @click="showFavoritesOnly = !showFavoritesOnly" class="text-sm px-3 py-1.5 rounded-lg transition"
+              :class="showFavoritesOnly ? 'bg-yellow-500/20 text-yellow-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'">
+              {{ showFavoritesOnly ? '★ Favoris uniquement' : '☆ Tout afficher' }}
+            </button>
+          </div>
+
+          <div v-if="filteredPosts.length === 0 && !isLoading" class="text-center py-10 text-slate-500">
+            <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications
+              ici.</p>
+            <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
+            <p v-else>Aucune publication.</p>
+          </div>
+
+          <article v-for="post in filteredPosts" :key="post.id"
             class="bg-[#151725] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition shadow-lg shadow-black/20 cursor-pointer"
             @click="selectedPost = post">
             <div class="flex justify-between items-start mb-4">
@@ -121,6 +172,27 @@ const onCommentAdded = () => {
                       </NuxtLink>
                     </span>
                   </div>
+                </div>
+              </div>
+
+              <div v-if="isMe(post.author)" class="relative">
+                <button @click.stop="openMenuId = openMenuId === post.id ? null : post.id"
+                  class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                <div v-if="openMenuId === post.id"
+                  class="absolute right-0 top-10 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-10 min-w-[140px]">
+                  <button @click.stop="handleDeletePost(post)"
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Supprimer
+                  </button>
                 </div>
               </div>
             </div>
