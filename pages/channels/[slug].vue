@@ -163,45 +163,8 @@ watch(messages, () => scrollToBottom())
         </main>
 
         <footer class="flex-none p-4 bg-slate-900 border-t border-slate-800">
-          <div v-if="selectedFile" class="mb-2 relative inline-block">
-            <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-700 group">
-              <img :src="filePreview" class="w-full h-full object-cover" />
-              <button @click="removeFile"
-                class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <form @submit.prevent="handleSend" class="relative w-full flex gap-2">
-            <button type="button" @click="$refs.fileInput.click()"
-              class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition border border-slate-700"
-              title="Ajouter une image">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-              </svg>
-            </button>
-            <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileSelect" />
-
-            <input v-model="newMessage" type="text"
-              :placeholder="`Envoyer un message dans #${channel?.name || channelSlug}`"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-4 pr-12 py-3 focus:border-blue-500 transition text-white"
-              :disabled="isSending" />
-            <button type="submit" :disabled="(!newMessage.trim() && !selectedFile) || isSending"
-              class="absolute right-2 top-2 p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </form>
+          <PublicationComposer :default-channel="channel" :show-channel-selector="false"
+            :placeholder="`Envoyer un message dans #${channel?.name || channelSlug}`" @posted="scrollToBottom" />
         </footer>
       </template>
     </div>
