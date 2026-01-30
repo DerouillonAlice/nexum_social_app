@@ -127,8 +127,8 @@ const filteredPosts = computed(() => {
     <template v-if="authStore.user">
       <AppSidebar />
 
-      <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative">
-        <div class="max-w-3xl mx-auto space-y-8">
+      <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative min-w-0">
+        <div class="mx-auto space-y-8 max-w-5xl">
 
           <LoadingSpinner v-if="isLoading" />
 
@@ -225,22 +225,27 @@ const filteredPosts = computed(() => {
         </div>
       </div>
 
-      <aside v-if="selectedPost"
-        class="hidden xl:flex flex-col w-[28rem] overflow-hidden border-l border-white/5 bg-[#12141f] transition-all duration-300">
-        <div
-          class="border-b border-white/5 p-6 flex items-center justify-between bg-[#0f111a]/50 backdrop-blur-sm sticky top-0 z-10">
-          <h3 class="font-semibold text-lg text-white">Commentaires</h3>
-          <button @click="selectedPost = null"
-            class="p-2 hover:bg-white/5 rounded-lg transition text-slate-400 hover:text-white">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="flex-1 overflow-y-auto">
-          <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
-        </div>
-      </aside>
+      <!-- Panel commentaires droit - pousse le contenu -->
+      <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="max-w-0"
+        enter-to-class="max-w-[28rem]" leave-active-class="transition-all duration-300 ease-in"
+        leave-from-class="max-w-[28rem]" leave-to-class="max-w-0">
+        <aside v-if="selectedPost"
+          class="hidden xl:flex flex-col w-[28rem] overflow-hidden border-l border-white/5 bg-[#12141f] flex-shrink-0">
+          <div
+            class="border-b border-white/5 p-6 flex items-center justify-between bg-[#0f111a]/50 backdrop-blur-sm sticky top-0 z-10">
+            <h3 class="font-semibold text-lg text-white whitespace-nowrap">Commentaires</h3>
+            <button @click="selectedPost = null"
+              class="p-2 hover:bg-white/5 rounded-lg transition text-slate-400 hover:text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 overflow-y-auto">
+            <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+          </div>
+        </aside>
+      </Transition>
 
       <!-- Modal commentaires mobile -->
       <div v-if="selectedPost"
