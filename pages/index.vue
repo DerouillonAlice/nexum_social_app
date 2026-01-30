@@ -130,8 +130,6 @@ const filteredPosts = computed(() => {
       <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative min-w-0">
         <div class="mx-auto space-y-8 max-w-5xl">
 
-          <LoadingSpinner v-if="isLoading" />
-
           <PublicationComposer :show-channel-selector="true" @posted="fetchPosts" class="mb-10" />
 
           <div class="flex items-center justify-between mb-6">
@@ -143,7 +141,9 @@ const filteredPosts = computed(() => {
             </button>
           </div>
 
-          <div v-if="filteredPosts.length === 0 && !isLoading" class="text-center py-10 text-slate-500">
+          <LoadingSpinner v-if="isLoading" />
+
+          <div v-else-if="filteredPosts.length === 0" class="text-center py-10 text-slate-500">
             <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications
               ici.</p>
             <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
@@ -151,9 +151,8 @@ const filteredPosts = computed(() => {
           </div>
 
           <article v-for="post in filteredPosts" :key="post.id"
-            class="bg-[#151725] rounded-2xl p-8 border border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/20 cursor-pointer"
-            :class="selectedPost?.id === post.id ? 'border-blue-500/50 ring-2 ring-blue-500/20' : ''"
-            @click="selectedPost = post">
+            class="bg-[#151725] rounded-2xl p-8 border border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/20"
+            :class="selectedPost?.id === post.id ? 'border-blue-500/50 ring-2 ring-blue-500/20' : ''">
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
                 <UserAvatar :user="post.author" sizeClass="h-10 w-10" />
@@ -204,7 +203,8 @@ const filteredPosts = computed(() => {
             </p>
 
             <div class="flex items-center gap-4 pt-4 border-t border-white/5">
-              <button class="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 transition group">
+              <button @click="selectedPost = post"
+                class="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 transition group">
                 <svg class="h-5 w-5 text-slate-500 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
