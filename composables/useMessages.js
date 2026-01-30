@@ -54,8 +54,8 @@ export const useMessages = () => {
     }
   }
 
-  const sendMessage = async (channel, content) => {
-    if (!content.trim() || isSending.value) return false
+  const sendMessage = async (channel, content, file = null) => {
+    if ((!content.trim() && !file) || isSending.value) return false
 
     isSending.value = true
     try {
@@ -70,7 +70,7 @@ export const useMessages = () => {
           channelIRI = channel['@id'] || channel.id
       }
 
-      await request('/publications', {
+      const publication = await request('/publications', {
         method: 'POST',
         body: {
           title: 'Message',
@@ -79,9 +79,19 @@ export const useMessages = () => {
         }
       })
       
+      if (file && publication) {
+        try {
+          const publicationIri = publication['@id'] || publication.id
+          await useAPI().uploadMedia(file, { publication: publicationIri })
+        } catch (mediaError) {
+          console.error("Erreur upload media", mediaError)
+        }
+      }
+      
       await fetchMessages(channel)
       return true 
     } catch (e) {
+      console.error("Erreur envoi message", e)
       return false
     } finally {
       isSending.value = false

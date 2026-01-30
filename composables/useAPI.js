@@ -105,9 +105,20 @@ const login = async (email, password) => {
     })
   }
 
-  const uploadMedia = async (file) => {
+  const uploadMedia = async (file, additionalFields = {}) => {
     const formData = new FormData()
     formData.append('file', file)
+    
+    Object.keys(additionalFields).forEach(key => {
+      formData.append(key, additionalFields[key])
+    })
+
+    if (authStore.user && (authStore.user['@id'] || authStore.user.id)) {
+        const userId = authStore.user['@id'] || `/api/users/${authStore.user.id}`
+        if (!formData.has('owner')) {
+             formData.append('owner', userId)
+        }
+    }
 
     const baseURL = `${config.public.apiBaseUrl}/${config.public.slug}`
     
@@ -125,6 +136,7 @@ const login = async (email, password) => {
       body: formData,
       headers,
       async onResponseError({ response }) {
+        console.error('Upload Error Response:', response._data)
         if (response.status === 401) {
           authStore.clearAuth()
           navigateTo('/login')
