@@ -65,10 +65,10 @@ const createChannel = async () => {
   <div class="h-full flex flex-1 overflow-hidden">
     <AppSidebar />
 
-    <div class="flex-1 overflow-y-auto bg-slate-950 p-6">
+    <div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-950 p-6">
       <div class="max-w-5xl mx-auto">
         <div class="flex justify-between items-end mb-6">
-          <h2 class="text-2xl font-bold text-white">Salons disponibles</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Salons disponibles</h2>
           <div class="flex items-center gap-4">
             <button @click="refresh" class="text-sm text-blue-400 hover:underline cursor-pointer">
               Actualiser
@@ -90,26 +90,26 @@ const createChannel = async () => {
         </div>
 
         <div v-else-if="!channels || channels.length === 0"
-          class="text-center py-20 bg-slate-900/50 rounded-xl border border-slate-800 border-dashed">
-          <p class="text-slate-500">Aucun salon n'a été créé pour le moment.</p>
+          class="text-center py-20 bg-gray-100 dark:bg-slate-900/50 rounded-xl border border-gray-300 dark:border-slate-800 border-dashed">
+          <p class="text-gray-500 dark:text-slate-500">Aucun salon n'a été créé pour le moment.</p>
         </div>
 
         <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div v-for="channel in channels" :key="channel.id"
-            class="group bg-slate-900 border border-slate-800 hover:border-slate-700 p-5 rounded-xl transition duration-200 flex flex-col h-full">
+            class="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 p-5 rounded-xl transition duration-200 flex flex-col h-full">
             <div class="flex justify-between items-start mb-3">
               <span class="text-2xl">💬</span>
               <span
-                class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-full group-hover:bg-slate-700 transition">
+                class="text-xs bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-1 rounded-full group-hover:bg-gray-300 dark:group-hover:bg-slate-700 transition">
                 {{ formatDate(channel.createdAt) }}
               </span>
             </div>
 
-            <h3 class="text-lg font-bold text-white mb-1 group-hover:text-blue-400 transition">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-400 transition">
               {{ channel.name }}
             </h3>
 
-            <p class="text-sm text-slate-400 line-clamp-2 mb-4 flex-grow">
+            <p class="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 mb-4 flex-grow">
               {{ channel.description || "Pas de description" }}
             </p>
 
@@ -124,7 +124,7 @@ const createChannel = async () => {
                 </svg>
               </button>
               <NuxtLink :to="`/channels/${channel.slug}`"
-                class="flex-1 text-center py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
+                class="flex-1 text-center py-2 rounded-lg bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-900 dark:text-slate-300 text-sm font-medium transition">
                 Voir
               </NuxtLink>
             </div>
@@ -135,14 +135,17 @@ const createChannel = async () => {
 
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
       @click.self="showModal = false">
-      <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative">
-        <button class="absolute top-4 right-4 text-slate-500 hover:text-white" @click="showModal = false">
+      <div
+        class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative">
+        <button
+          class="absolute top-4 right-4 text-gray-500 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white"
+          @click="showModal = false">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <h3 class="text-xl font-bold text-white mb-6">Créer un nouveau salon</h3>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Créer un nouveau salon</h3>
 
         <form @submit.prevent="createChannel" class="space-y-4">
           <div v-if="errorMessage" class="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
@@ -150,21 +153,21 @@ const createChannel = async () => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-400 mb-1">Nom du salon</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">Nom du salon</label>
             <input v-model="newChannel.name" type="text"
-              class="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition"
+              class="w-full bg-gray-100 dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition"
               placeholder="ex: Général" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-400 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">Description</label>
             <textarea v-model="newChannel.description" rows="3"
-              class="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition"
+              class="w-full bg-gray-100 dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition"
               placeholder="De quoi parle ce salon ?"></textarea>
           </div>
 
           <div class="flex justify-end pt-2">
             <button type="button" @click="showModal = false"
-              class="px-4 py-2 text-slate-400 hover:text-white mr-2">Annuler</button>
+              class="px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white mr-2">Annuler</button>
             <button type="submit" :disabled="isCreating"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition flex items-center gap-2">
               <span v-if="isCreating"

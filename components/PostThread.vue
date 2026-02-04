@@ -129,17 +129,17 @@ watch(() => props.post, () => {
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="p-6 pb-6 border-b border-white/5 shrink-0">
+    <div class="p-6 pb-6 border-b border-gray-200 dark:border-white/5 shrink-0">
       <div class="flex justify-between items-start mb-4">
         <div class="flex items-center gap-3">
           <UserAvatar :user="post.author" sizeClass="h-8 w-8" />
           <div>
-            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               {{ getUserName(post.author) }}
               <span v-if="isMe(post.author)"
                 class="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
             </h3>
-            <div class="flex items-center gap-2 text-[10px] text-slate-500">
+            <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-slate-500">
               <span>{{ formatDate(post.createdAt) }}</span>
               <span v-if="post.channel">
                 • <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`"
@@ -150,7 +150,7 @@ watch(() => props.post, () => {
           </div>
         </div>
       </div>
-      <p class="text-slate-300 text-xs mb-3 line-clamp-3">
+      <p class="text-gray-700 dark:text-slate-300 text-xs mb-3 line-clamp-3">
         {{ post.body }}
       </p>
     </div>
@@ -160,18 +160,18 @@ watch(() => props.post, () => {
         :class="[isMe(comment.author) ? 'flex-row-reverse' : 'flex-row']">
         <UserAvatar v-if="!isMe(comment.author)" :user="comment.author" sizeClass="h-8 w-8 mt-1" />
         <div class="flex flex-col max-w-[85%]" :class="[isMe(comment.author) ? 'items-end' : 'items-start']">
-          <h4 class="text-[10px] font-bold text-slate-400 mb-1 px-1"
+          <h4 class="text-[10px] font-bold text-gray-600 dark:text-slate-400 mb-1 px-1"
             :class="[isMe(comment.author) ? 'text-right' : 'text-left']">
             {{ isMe(comment.author) ? 'Vous' : getUserName(comment.author) }}
           </h4>
           <div class="p-3 text-sm wrap-break-word relative group transition-all duration-200" :class="[
             isMe(comment.author)
               ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm'
-              : 'bg-[#2a2d3d] text-slate-200 rounded-2xl rounded-tl-sm'
+              : 'bg-gray-200 dark:bg-[#2a2d3d] text-gray-900 dark:text-slate-200 rounded-2xl rounded-tl-sm'
           ]">
             {{ comment.body }}
           </div>
-          <span class="text-[10px] text-slate-500 mt-1 px-1">
+          <span class="text-[10px] text-gray-500 dark:text-slate-500 mt-1 px-1">
             {{ comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit'
@@ -181,10 +181,11 @@ watch(() => props.post, () => {
       </div>
     </div>
 
-    <div class="p-6 border-t border-white/5 bg-[#0f111a]/30 backdrop-blur-sm shrink-0">
+    <div
+      class="p-6 border-t border-gray-200 dark:border-white/5 bg-gray-100 dark:bg-[#0f111a]/30 backdrop-blur-sm shrink-0">
       <form @submit.prevent="submitComment" class="relative">
         <input v-model="newComment" type="text"
-          class="w-full bg-[#151725] border border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition"
+          class="w-full bg-gray-200 dark:bg-[#151725] border border-gray-300 dark:border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition"
           :placeholder="`Répondre à ${getUserName(post.author).split(' ')[0]}...`" :disabled="isSendingComment">
         <button type="submit" :disabled="isSendingComment || !newComment.trim()"
           class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed">

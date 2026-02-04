@@ -194,12 +194,12 @@ const filteredPosts = computed(() => {
               <div class="flex items-center gap-3">
                 <UserAvatar :user="post.author" sizeClass="h-10 w-10" />
                 <div>
-                  <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     {{ getUserName(post.author) }}
                     <span v-if="isMe(post.author)"
                       class="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
                   </h3>
-                  <div class="flex items-center gap-2 text-xs text-slate-500">
+                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
                     <span>{{ formatDate(post.createdAt) }}</span>
                     <span v-if="post.channel" class="flex items-center gap-1">
                       • dans
@@ -215,7 +215,7 @@ const filteredPosts = computed(() => {
 
               <div v-if="isMe(post.author)" class="relative">
                 <button @click.stop="openMenuId = openMenuId === post.id ? null : post.id"
-                  class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">
+                  class="p-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -235,15 +235,15 @@ const filteredPosts = computed(() => {
               </div>
             </div>
 
-            <p class="text-slate-300 text-sm mb-4 leading-relaxed whitespace-pre-wrap">
+            <p class="text-gray-700 dark:text-slate-300 text-sm mb-4 leading-relaxed whitespace-pre-wrap">
               {{ post.body }}
             </p>
 
-            <div class="flex items-center gap-4 pt-4 border-t border-white/5">
+            <div class="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-white/5">
               <button @click="selectedPost = post"
-                class="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 transition group">
-                <svg class="h-5 w-5 text-slate-500 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                class="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400 hover:text-blue-400 transition group">
+                <svg class="h-5 w-5 text-gray-500 dark:text-slate-500 group-hover:text-blue-500" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -266,12 +266,12 @@ const filteredPosts = computed(() => {
         enter-to-class="max-w-[28rem]" leave-active-class="transition-all duration-300 ease-in"
         leave-from-class="max-w-[28rem]" leave-to-class="max-w-0">
         <aside v-if="selectedPost"
-          class="hidden xl:flex flex-col w-[28rem] overflow-hidden border-l border-white/5 bg-[#12141f] flex-shrink-0">
+          class="hidden xl:flex flex-col w-[28rem] overflow-hidden border-l border-gray-200 dark:border-white/5 bg-gray-100 dark:bg-[#12141f] flex-shrink-0">
           <div
-            class="border-b border-white/5 p-6 flex items-center justify-between bg-[#0f111a]/50 backdrop-blur-sm sticky top-0 z-10">
-            <h3 class="font-semibold text-lg text-white whitespace-nowrap">Commentaires</h3>
+            class="border-b border-gray-200 dark:border-white/5 p-6 flex items-center justify-between bg-white dark:bg-[#0f111a]/50 backdrop-blur-sm sticky top-0 z-10">
+            <h3 class="font-semibold text-lg text-gray-900 dark:text-white whitespace-nowrap">Commentaires</h3>
             <button @click="selectedPost = null"
-              class="p-2 hover:bg-white/5 rounded-lg transition text-slate-400 hover:text-white flex-shrink-0">
+              class="p-2 hover:bg-gray-200 dark:hover:bg-white/5 rounded-lg transition text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white flex-shrink-0">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
