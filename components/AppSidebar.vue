@@ -7,9 +7,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <nav class="w-64 p-6 overflow-y-auto hidden md:block border-r border-white/5 bg-[#0f111a]" style="height: 100%;">
+  <nav
+    class="w-64 p-6 overflow-y-auto hidden md:block border-r border-gray-200 dark:border-white/5 bg-white dark:bg-[#0f111a]"
+    style="height: 100%;">
     <div class="space-y-1">
-      <h3 class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Menu</h3>
+      <h3 class="px-3 text-xs font-semibold text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-4">Menu</h3>
 
       <NuxtLink to="/" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md"
         exact-active-class="bg-blue-500/10 text-blue-400">

@@ -159,26 +159,28 @@ const filteredPosts = computed(() => {
 </script>
 
 <template>
-  <div class="flex overflow-hidden bg-[#0f111a] text-white" style="height: calc(100vh - 4rem);">
+  <div class="flex overflow-hidden bg-gray-50 dark:bg-[#0f111a] text-gray-900 dark:text-white"
+    style="height: calc(100vh - 4rem);">
     <template v-if="authStore.user">
       <AppSidebar />
 
-      <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative min-w-0">
+      <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-gray-200 dark:border-white/5 relative min-w-0">
         <div class="mx-auto space-y-8 max-w-5xl">
 
           <LoadingSpinner v-if="initialLoading" class="mb-10" />
           <PublicationComposer v-else :show-channel-selector="true" @posted="fetchPosts" class="mb-10" />
 
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-white">Publications</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Publications</h2>
             <button @click="showFavoritesOnly = !showFavoritesOnly"
               class="text-sm px-4 py-2 rounded-lg transition font-medium"
-              :class="showFavoritesOnly ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'">
+              :class="showFavoritesOnly ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' : 'bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-slate-400 hover:bg-gray-300 dark:hover:bg-slate-700'">
               {{ showFavoritesOnly ? '★ Favoris uniquement' : '☆ Tout afficher' }}
             </button>
           </div>
 
-          <div v-if="filteredPosts.length === 0 && !initialLoading" class="text-center py-10 text-slate-500">
+          <div v-if="filteredPosts.length === 0 && !initialLoading"
+            class="text-center py-10 text-gray-500 dark:text-slate-500">
             <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications
               ici.</p>
             <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
@@ -186,7 +188,7 @@ const filteredPosts = computed(() => {
           </div>
 
           <article v-for="post in filteredPosts" :key="post.id"
-            class="bg-[#151725] rounded-2xl p-8 border border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/20"
+            class="bg-white dark:bg-[#151725] rounded-2xl p-8 border border-gray-200 dark:border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/10 dark:shadow-black/20"
             :class="selectedPost?.id === post.id ? 'border-blue-500/50 ring-2 ring-blue-500/20' : ''">
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
