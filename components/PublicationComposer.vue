@@ -87,12 +87,12 @@ const canSubmit = computed(() => {
 </script>
 
 <template>
-    <div class="bg-[#151725] rounded-2xl p-4 border border-white/5 shadow-lg">
+    <div class="bg-white dark:bg-[#151725] rounded-2xl p-4 border border-gray-200 dark:border-white/5 shadow-lg">
         <div class="flex gap-4">
             <div class="flex-1">
                 <div v-if="showChannelSelector" class="mb-3">
                     <select v-model="selectedChannel"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 transition">
+                        class="w-full bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-blue-500 transition">
                         <option :value="null" disabled>Sélectionner un salon</option>
                         <option v-for="channel in channels" :key="channel.id" :value="channel">
                             # {{ channel.name }}
@@ -101,11 +101,12 @@ const canSubmit = computed(() => {
                 </div>
 
                 <textarea v-model="content" :placeholder="props.placeholder" rows="3"
-                    class="w-full bg-slate-900/50 border border-slate-700/50 rounded-lg p-3 text-white placeholder-slate-500 focus:border-blue-500/50 focus:bg-slate-900 transition resize-none"
+                    class="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700/50 rounded-lg p-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500 focus:border-blue-500/50 focus:bg-white dark:focus:bg-slate-900 transition resize-none"
                     :disabled="isSending" @keydown.enter.ctrl.exact="handleSubmit"
                     @keydown.enter.meta.exact="handleSubmit"></textarea>
                 <div v-if="selectedFile" class="mt-3 relative inline-block">
-                    <div class="relative h-20 w-20 rounded-lg overflow-hidden border border-slate-700 group">
+                    <div
+                        class="relative h-20 w-20 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-700 group">
                         <img :src="filePreview" class="w-full h-full object-cover" />
                         <button @click="removeFile" type="button"
                             class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white">
@@ -117,7 +118,7 @@ const canSubmit = computed(() => {
                             </svg>
                         </button>
                     </div>
-                    <div class="text-xs text-slate-500 mt-1 truncate max-w-[120px]">
+                    <div class="text-xs text-gray-500 dark:text-slate-500 mt-1 truncate max-w-[120px]">
                         {{ selectedFile.name }}
                     </div>
                 </div>
@@ -125,7 +126,7 @@ const canSubmit = computed(() => {
                 <div class="flex justify-between items-center mt-3">
                     <div class="flex items-center gap-2">
                         <button type="button" @click="fileInput.click()"
-                            class="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition"
+                            class="p-2 text-gray-600 dark:text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition"
                             title="Ajouter une image">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

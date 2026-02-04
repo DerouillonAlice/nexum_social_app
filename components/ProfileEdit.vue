@@ -20,14 +20,14 @@ const avatarPreview = ref(null)
 
 const currentAvatar = computed(() => {
   if (avatarPreview.value) return avatarPreview.value
-  
+
   const avatar = authStore.user?.avatar
   if (!avatar) return null
-  
+
   if (typeof avatar === 'object' && avatar.contentUrl) {
     return avatar.contentUrl
   }
-  
+
   return null
 })
 
@@ -122,8 +122,8 @@ const handleUpdateProfile = async () => {
     console.log('Update response:', response)
 
     // Update local auth store
-    authStore.user = { 
-      ...authStore.user, 
+    authStore.user = {
+      ...authStore.user,
       ...updateData
     }
 
@@ -140,131 +140,92 @@ const handleUpdateProfile = async () => {
 </script>
 
 <template>
-  <div class="bg-[#151725] rounded-2xl p-6 border border-white/5">
-    <h2 class="text-xl font-bold text-white mb-6">Modifier mon profil</h2>
+  <div class="bg-white dark:bg-[#151725] rounded-2xl p-6 border border-gray-200 dark:border-white/5">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Modifier mon profil</h2>
 
     <form @submit.prevent="handleUpdateProfile" class="space-y-6">
       <!-- Avatar Section -->
-      <div class="flex flex-col items-center gap-4 pb-6 border-b border-white/5">
+      <div class="flex flex-col items-center gap-4 pb-6 border-b border-gray-200 dark:border-white/5">
         <div class="relative">
-          <div class="w-32 h-32 rounded-full overflow-hidden bg-slate-800 border-4 border-slate-700">
-            <img 
-              v-if="currentAvatar" 
-              :src="currentAvatar" 
-              alt="Avatar" 
-              class="w-full h-full object-cover"
-            />
-            <div v-else class="w-full h-full flex items-center justify-center text-4xl text-slate-500">
+          <div
+            class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 dark:bg-slate-800 border-4 border-gray-300 dark:border-slate-700">
+            <img v-if="currentAvatar" :src="currentAvatar" alt="Avatar" class="w-full h-full object-cover" />
+            <div v-else
+              class="w-full h-full flex items-center justify-center text-4xl text-gray-400 dark:text-slate-500">
               {{ displayName[0]?.toUpperCase() || '?' }}
             </div>
           </div>
-          <div v-if="isUploadingAvatar" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+          <div v-if="isUploadingAvatar"
+            class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
             <LoadingSpinner />
           </div>
         </div>
 
         <div class="text-center">
           <label class="cursor-pointer">
-            <span class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition inline-block">
+            <span
+              class="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-900 dark:text-white rounded-lg text-sm font-medium transition inline-block">
               {{ selectedAvatar ? 'Changer l\'image' : 'Choisir un avatar' }}
             </span>
-            <input 
-              type="file" 
-              accept="image/*"
-              @change="handleAvatarSelect"
-              :disabled="isUpdating"
-              class="hidden"
-            />
+            <input type="file" accept="image/*" @change="handleAvatarSelect" :disabled="isUpdating" class="hidden" />
           </label>
-          <p class="text-xs text-slate-500 mt-2">Max 5 Mo</p>
+          <p class="text-xs text-gray-500 dark:text-slate-500 mt-2">Max 5 Mo</p>
         </div>
       </div>
 
       <!-- Email -->
       <div>
-        <label for="email" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Email
         </label>
-        <input
-          id="email"
-          v-model="email"
-          type="email"
-          required
-          :disabled="isUpdating"
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-        />
+        <input id="email" v-model="email" type="email" required :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50" />
       </div>
 
       <!-- Display Name -->
       <div>
-        <label for="displayName" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="displayName" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Nom d'affichage
         </label>
-        <input
-          id="displayName"
-          v-model="displayName"
-          type="text"
-          required
-          :disabled="isUpdating"
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-        />
+        <input id="displayName" v-model="displayName" type="text" required :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50" />
       </div>
 
       <!-- First Name -->
       <div>
-        <label for="prenom" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="prenom" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Prénom
         </label>
-        <input
-          id="prenom"
-          v-model="prenom"
-          type="text"
-          :disabled="isUpdating"
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-        />
+        <input id="prenom" v-model="prenom" type="text" :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50" />
       </div>
 
       <!-- Last Name -->
       <div>
-        <label for="nom" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="nom" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Nom
         </label>
-        <input
-          id="nom"
-          v-model="nom"
-          type="text"
-          :disabled="isUpdating"
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-        />
+        <input id="nom" v-model="nom" type="text" :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50" />
       </div>
 
       <!-- Birthday -->
       <div>
-        <label for="dateAnniversaire" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="dateAnniversaire" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Date d'anniversaire
         </label>
-        <input
-          id="dateAnniversaire"
-          v-model="dateAnniversaire"
-          type="date"
-          :disabled="isUpdating"
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
-        />
+        <input id="dateAnniversaire" v-model="dateAnniversaire" type="date" :disabled="isUpdating"
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50" />
       </div>
 
       <!-- Biography -->
       <div>
-        <label for="biographie" class="block text-sm font-medium text-slate-300 mb-2">
+        <label for="biographie" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Biographie
         </label>
-        <textarea
-          id="biographie"
-          v-model="biographie"
-          rows="4"
-          :disabled="isUpdating"
+        <textarea id="biographie" v-model="biographie" rows="4" :disabled="isUpdating"
           placeholder="Parlez-nous de vous..."
-          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50 resize-none"
-        ></textarea>
+          class="w-full px-4 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50 resize-none"></textarea>
       </div>
 
       <div v-if="errorMsg" class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
@@ -275,11 +236,8 @@ const handleUpdateProfile = async () => {
         {{ successMsg }}
       </div>
 
-      <button
-        type="submit"
-        :disabled="isUpdating"
-        class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <button type="submit" :disabled="isUpdating"
+        class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
         {{ isUpdating ? 'Mise à jour...' : 'Enregistrer les modifications' }}
       </button>
     </form>
