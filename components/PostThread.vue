@@ -40,10 +40,18 @@ const fetchComments = async () => {
   if (!props.post) return
 
   try {
-    const parentId = props.post['@id'] || props.post.id
-    const data = await request('/publications', {
+    const config = useRuntimeConfig()
+    const route = useRoute()
+    const slug = route.params.slug || config.public.slug
+
+    const publicationIri = props.post['@id']
+      || (props.post.id ? `/api/${slug}/publications/${props.post.id}` : null)
+
+    if (!publicationIri) return
+
+    const data = await request('/comments', {
       query: {
-        parent: parentId,
+        publication: publicationIri,
         'order[createdAt]': 'asc'
       }
     })
@@ -51,17 +59,18 @@ const fetchComments = async () => {
     const rawComments = data.member || data['hydra:member'] || []
 
     comments.value = rawComments.filter(comment => {
-      if (!comment.parent) return false
+      const parentRef = comment.publication || comment.parent
 
-      const commentParentId = typeof comment.parent === 'object' ? (comment.parent['@id'] || comment.parent.id) : comment.parent
-      const currentPostId = props.post['@id'] || props.post.id
+      if (!parentRef) return false
 
-      if (!commentParentId || !currentPostId) return false
+      const commentParentId = typeof parentRef === 'object'
+        ? (parentRef['@id'] || parentRef.id)
+        : parentRef
 
-      const cId = String(commentParentId)
-      const pId = String(currentPostId)
+      const cId = String(commentParentId).split('/').pop()
+      const pId = String(props.post.id || (props.post['@id'] ? props.post['@id'].split('/').pop() : ''))
 
-      return cId.includes(pId) || pId.includes(cId)
+      return cId === pId
     })
 
   } catch (e) {
@@ -75,20 +84,29 @@ const submitComment = async () => {
 
   isSendingComment.value = true
   try {
-    const parentIri = props.post['@id'] || `/api/publications/${props.post.id}`
-    const channelIri = typeof props.post.channel === 'object'
-      ? props.post.channel['@id']
-      : props.post.channel
+    const config = useRuntimeConfig()
+    const route = useRoute()
+    const slug = route.params.slug || config.public.slug
 
-    const response = await request('/publications', {
+    const publicationIri = props.post['@id']
+      || (props.post.id ? `/api/${slug}/publications/${props.post.id}` : null)
+
+    console.log('PostThread: Submitting comment', { publicationIri, body: newComment.value })
+
+    if (!publicationIri) {
+      console.error("No publication IRI found", props.post)
+      return
+    }
+
+    const response = await request('/comments', {
       method: 'POST',
       body: {
-        title: 'Reply',
         body: newComment.value,
-        parent: parentIri,
-        channel: channelIri
+        publication: publicationIri
       }
     })
+
+    console.log('PostThread: Comment submitted', response)
 
 
     if (response) {
@@ -96,8 +114,6 @@ const submitComment = async () => {
     }
 
     newComment.value = ''
-    fetchComments()
-    emit('comment-added')
   } catch (e) {
     console.error(e)
   } finally {

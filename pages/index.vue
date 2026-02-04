@@ -7,9 +7,10 @@ const { deletePublication } = useMessages()
 
 const posts = ref([])
 const selectedPost = ref(null)
-const isLoading = ref(false)
+const initialLoading = ref(true)
 const showFavoritesOnly = ref(true)
 const openMenuId = ref(null)
+const commentCounts = ref({})
 
 const handleDeletePost = async (post) => {
   if (!confirm('Supprimer cette publication ?')) return
@@ -48,6 +49,7 @@ const fetchPosts = async () => {
       if (!selectedPost.value || !posts.value.some(p => (p.id && selectedPost.value.id && p.id === selectedPost.value.id) || (p['@id'] && selectedPost.value['@id'] && p['@id'] === selectedPost.value['@id']))) {
         selectedPost.value = posts.value[0]
       }
+      fetchCommentCounts()
     } else {
       selectedPost.value = null
     }
@@ -56,13 +58,43 @@ const fetchPosts = async () => {
   }
 }
 
+const fetchCommentCounts = async () => {
+  try {
+    const data = await request('/comments', {
+      query: {
+        itemsPerPage: 500,
+        'order[createdAt]': 'desc'
+      }
+    })
+
+    const allComments = data.member || data['hydra:member'] || []
+    const counts = {}
+
+    allComments.forEach(comment => {
+      if (comment.publication) {
+        const pubId = typeof comment.publication === 'object'
+          ? (comment.publication.id || comment.publication['@id']?.split('/').pop())
+          : String(comment.publication).split('/').pop()
+
+        if (pubId) {
+          counts[pubId] = (counts[pubId] || 0) + 1
+        }
+      }
+    })
+
+    commentCounts.value = counts
+  } catch (e) {
+    console.error("Failed to fetch comment counts", e)
+  }
+}
+
 onMounted(async () => {
   if (authStore.user) {
-    isLoading.value = true
+    initialLoading.value = true
     await fetchUsers()
     await fetchChannels()
     await fetchPosts()
-    isLoading.value = false
+    initialLoading.value = false
   }
 })
 
@@ -97,6 +129,10 @@ const onCommentAdded = () => {
   if (selectedPost.value) {
     if (!selectedPost.value.comments) selectedPost.value.comments = []
     selectedPost.value.comments.push({ id: 'temp_' + Date.now() })
+    // Increment local count
+    if (selectedPost.value.id) {
+      commentCounts.value[selectedPost.value.id] = (commentCounts.value[selectedPost.value.id] || 0) + 1
+    }
   }
 }
 
@@ -130,7 +166,8 @@ const filteredPosts = computed(() => {
       <div class="flex-1 overflow-y-auto px-8 py-8 border-r border-white/5 relative min-w-0">
         <div class="mx-auto space-y-8 max-w-5xl">
 
-          <PublicationComposer :show-channel-selector="true" @posted="fetchPosts" class="mb-10" />
+          <LoadingSpinner v-if="initialLoading" class="mb-10" />
+          <PublicationComposer v-else :show-channel-selector="true" @posted="fetchPosts" class="mb-10" />
 
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-bold text-white">Publications</h2>
@@ -141,9 +178,7 @@ const filteredPosts = computed(() => {
             </button>
           </div>
 
-          <LoadingSpinner v-if="isLoading" />
-
-          <div v-else-if="filteredPosts.length === 0" class="text-center py-10 text-slate-500">
+          <div v-if="filteredPosts.length === 0 && !initialLoading" class="text-center py-10 text-slate-500">
             <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications
               ici.</p>
             <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
@@ -210,7 +245,7 @@ const filteredPosts = computed(() => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                Commenter ({{ post.comments?.length || 0 }})
+                Commenter ({{ commentCounts[post.id] || 0 }})
               </button>
               <button class="flex items-center gap-2 text-sm text-slate-400 hover:text-pink-400 transition group">
                 <svg class="h-5 w-5 text-slate-500 group-hover:text-pink-500" fill="none" viewBox="0 0 24 24"
@@ -225,7 +260,6 @@ const filteredPosts = computed(() => {
         </div>
       </div>
 
-      <!-- Panel commentaires droit - pousse le contenu -->
       <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="max-w-0"
         enter-to-class="max-w-[28rem]" leave-active-class="transition-all duration-300 ease-in"
         leave-from-class="max-w-[28rem]" leave-to-class="max-w-0">
@@ -247,7 +281,6 @@ const filteredPosts = computed(() => {
         </aside>
       </Transition>
 
-      <!-- Modal commentaires mobile -->
       <div v-if="selectedPost"
         class="xl:hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center"
         @click="selectedPost = null">
