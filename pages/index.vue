@@ -47,8 +47,9 @@ const fetchPosts = async () => {
     })
 
     if (posts.value.length > 0) {
-      if (!selectedPost.value || !posts.value.some(p => (p.id && selectedPost.value.id && p.id === selectedPost.value.id) || (p['@id'] && selectedPost.value['@id'] && p['@id'] === selectedPost.value['@id']))) {
-        selectedPost.value = posts.value[0]
+      // If the currently selected post no longer exists in the list, deselect it
+      if (selectedPost.value && !posts.value.some(p => (p.id && selectedPost.value.id && p.id === selectedPost.value.id) || (p['@id'] && selectedPost.value['@id'] && p['@id'] === selectedPost.value['@id']))) {
+        selectedPost.value = null
       }
       fetchCommentCounts()
     } else {
