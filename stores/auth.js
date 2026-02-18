@@ -8,7 +8,19 @@ export const useAuthStore = defineStore('auth', {
       this.token = newToken
     },
     setUser(newUser) {
-      this.user = newUser
+      // Store only essential user fields to keep cookie size small
+      if (newUser) {
+        this.user = {
+          id: newUser.id,
+          '@id': newUser['@id'],
+          email: newUser.email,
+          displayName: newUser.displayName,
+          nom: newUser.nom,
+          prenom: newUser.prenom,
+        }
+      } else {
+        this.user = null
+      }
     },
     setAuth(newToken, newUser) {
       this.setToken(newToken)
@@ -17,13 +29,13 @@ export const useAuthStore = defineStore('auth', {
     clearAuth() {
       this.token = null
       this.user = null
-      // Also clear old cookies if they exist
+      // Clean up old cookies from previous approach
       const oldToken = useCookie('auth_token')
       const oldUser = useCookie('auth_user')
       oldToken.value = null
       oldUser.value = null
     },
-    // Migration: load from old cookies if persist plugin state is empty
+    // Migration: load token from old cookies if persist plugin state is empty
     loadFromCookie() {
       const oldToken = useCookie('auth_token')
       const oldUser = useCookie('auth_user')
@@ -31,9 +43,16 @@ export const useAuthStore = defineStore('auth', {
         this.token = oldToken.value
       }
       if (oldUser.value && !this.user) {
-        this.user = oldUser.value
+        try {
+          const parsed = typeof oldUser.value === 'string' 
+            ? JSON.parse(oldUser.value) 
+            : oldUser.value
+          this.setUser(parsed)
+        } catch (e) {
+          // ignore
+        }
       }
-      // Clean up old cookies once migrated
+      // Clean up old cookies
       if (this.token) {
         oldToken.value = null
         oldUser.value = null
