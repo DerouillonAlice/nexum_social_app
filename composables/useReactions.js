@@ -59,29 +59,45 @@ export const useReactions = () => {
       return authorId === myId
     })
 
-    try {
-      if (myReaction) {
-        const reactionId = myReaction.id || myReaction['@id']?.split('/').pop()
+    if (myReaction) {
+      // Optimistic: remove from UI immediately
+      const reactionId = myReaction.id || myReaction['@id']?.split('/').pop()
+      reactions.value[postId] = postReactions.filter(r => r !== myReaction)
+      try {
         await request(`/reactions/${reactionId}`, { method: 'DELETE' })
-        reactions.value[postId] = postReactions.filter(r => r !== myReaction)
-      } else {
-        const config = useRuntimeConfig()
-        const publicationIri = post['@id']
-          || (post.id ? `/api/${config.public.slug}/publications/${post.id}` : null)
+      } catch (e) {
+        console.warn('DELETE reaction error (may be server bug), re-syncing...', e)
+        // Re-fetch to get actual state from server
+        await fetchReactions()
+      }
+    } else {
+      // Optimistic: add a temporary reaction to UI
+      const config = useRuntimeConfig()
+      const publicationIri = post['@id']
+        || (post.id ? `/api/${config.public.slug}/publications/${post.id}` : null)
 
-        const newReaction = await request('/reactions', {
+      const tempReaction = {
+        id: 'temp_' + Date.now(),
+        type: 'like',
+        author: authStore.user['@id'] || `/api/users/${authStore.user.id}`,
+        publication: publicationIri
+      }
+      if (!reactions.value[postId]) reactions.value[postId] = []
+      reactions.value[postId].push(tempReaction)
+
+      try {
+        await request('/reactions', {
           method: 'POST',
           body: {
             type: 'like',
             publication: publicationIri
           }
         })
-
-        if (!reactions.value[postId]) reactions.value[postId] = []
-        reactions.value[postId].push(newReaction)
+      } catch (e) {
+        console.warn('POST reaction error (may be server bug), re-syncing...', e)
       }
-    } catch (e) {
-      console.error('Failed to toggle like', e)
+      // Always re-fetch to sync with actual server state
+      await fetchReactions()
     }
   }
 
