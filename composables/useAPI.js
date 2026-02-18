@@ -23,8 +23,11 @@ export const useAPI = () => {
       ...options,
       async onResponseError({ response }) {
         if (response.status === 401) {
-          authStore.clearAuth()
-          navigateTo('/login')
+          const route = useRoute()
+          if (route.path !== '/login') {
+            authStore.clearAuth()
+            navigateTo('/login')
+          }
         }
       }
     })
