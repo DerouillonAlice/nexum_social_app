@@ -14,7 +14,7 @@ describe('Authentication Flow', () => {
 
   it('should show error with invalid credentials', () => {
     // Mock 401 response
-    cy.intercept('POST', '**/login', {
+    cy.intercept('POST', /\/login/, {
       statusCode: 401,
       body: { message: 'Invalid credentials' }
     }).as('loginFail')
@@ -32,12 +32,12 @@ describe('Authentication Flow', () => {
 
   it('should login successfully with valid credentials', () => {
     // Mock success response
-    cy.intercept('POST', '**/login', {
+    cy.intercept('POST', /\/login/, {
       statusCode: 200,
       body: { token: 'fake-token-123' }
     }).as('loginSuccess')
 
-    cy.intercept('GET', '**/users*', {
+    cy.intercept('GET', /\/users/, {
       statusCode: 200,
       body: {
         'hydra:member': [

@@ -1,13 +1,13 @@
 describe('Publication Flow', () => {
   beforeEach(() => {
     // Mock Login
-    cy.intercept('POST', '**/login', {
+    cy.intercept('POST', /\/login/, {
       statusCode: 200,
       body: { token: 'fake-token-123' }
     }).as('loginSuccess')
 
     // Mock User Fetch
-    cy.intercept('GET', '**/users*', {
+    cy.intercept('GET', /\/users/, {
       statusCode: 200,
       body: {
         'hydra:member': [
@@ -34,7 +34,7 @@ describe('Publication Flow', () => {
     const postContent = `Test publication ${Date.now()}`
 
     // Mock Post Creation
-    cy.intercept('POST', '**/messages', {
+    cy.intercept('POST', /\/messages/, {
       statusCode: 201,
       body: {
         id: 100,
@@ -45,7 +45,7 @@ describe('Publication Flow', () => {
     }).as('createPost')
 
     // Mock Feed Refresh (GET messages)
-    cy.intercept('GET', '**/messages*', (req) => {
+    cy.intercept('GET', /\/messages/, (req) => {
         req.reply({
             statusCode: 200,
             body: {
