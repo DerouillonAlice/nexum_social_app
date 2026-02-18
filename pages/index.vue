@@ -191,24 +191,25 @@ const filteredPosts = computed(() => {
           </div>
 
           <article v-for="post in filteredPosts" :key="post.id"
-            class="bg-white dark:bg-[#151725] rounded-2xl p-8 border border-gray-200 dark:border-white/5 hover:border-blue-500/20 transition-all duration-200 shadow-lg shadow-black/10 dark:shadow-black/20"
-            :class="selectedPost?.id === post.id ? 'border-blue-500/50 ring-2 ring-blue-500/20' : ''">
-            <div class="flex justify-between items-start mb-4">
-              <div class="flex items-center gap-3">
-                <UserAvatar :user="post.author" sizeClass="h-10 w-10" />
+            class="group bg-white dark:bg-[#151725] rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
+            :class="selectedPost?.id === post.id ? 'ring-2 ring-blue-500/50 shadow-blue-500/10' : ''">
+
+            <div class="flex justify-between items-start mb-6">
+              <div class="flex items-center gap-4">
+                <UserAvatar :user="post.author" sizeClass="h-12 w-12 rounded-2xl" />
                 <div>
-                  <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     {{ getUserName(post.author) }}
                     <span v-if="isMe(post.author)"
-                      class="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 font-medium">Vous</span>
+                      class="px-2 py-0.5 rounded-full text-[10px] bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300 font-bold tracking-wide uppercase">Vous</span>
                   </h3>
-                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
+                  <div class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-slate-400">
                     <span>{{ formatDate(post.createdAt) }}</span>
                     <span v-if="post.channel" class="flex items-center gap-1">
-                      • dans
+                      <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-slate-600"></span>
+                      dans
                       <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`"
-                        class="text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium"
-                        @click.stop>
+                        class="text-blue-500 hover:text-blue-600 hover:underline transition-colors" @click.stop>
                         {{ getChannel(post.channel).name }}
                       </NuxtLink>
                     </span>
@@ -218,16 +219,16 @@ const filteredPosts = computed(() => {
 
               <div v-if="isMe(post.author)" class="relative">
                 <button @click.stop="openMenuId = openMenuId === post.id ? null : post.id"
-                  class="p-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  class="p-2 text-gray-400 hover:text-gray-900 dark:text-slate-500 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
                 </button>
                 <div v-if="openMenuId === post.id"
-                  class="absolute right-0 top-10 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-10 min-w-[140px]">
+                  class="absolute right-0 top-12 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-xl shadow-xl shadow-gray-200/50 dark:shadow-black/50 z-20 min-w-[160px] p-1.5 transform origin-top-right transition-all">
                   <button @click.stop="handleDeletePost(post)"
-                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-slate-700 rounded-lg transition">
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition font-medium">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -238,30 +239,49 @@ const filteredPosts = computed(() => {
               </div>
             </div>
 
-            <p class="text-gray-700 dark:text-slate-300 text-sm mb-4 leading-relaxed whitespace-pre-wrap">
-              {{ post.body }}
-            </p>
+            <div class="pl-0 sm:pl-[4rem]">
+              <p class="text-gray-800 dark:text-slate-200 text-base leading-relaxed whitespace-pre-wrap mb-6">
+                {{ post.body }}
+              </p>
 
-            <div class="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-white/5">
-              <button @click="selectedPost = post"
-                class="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400 hover:text-blue-400 transition group">
-                <svg class="h-5 w-5 text-gray-500 dark:text-slate-500 group-hover:text-blue-500" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                Commenter ({{ commentCounts[post.id] || 0 }})
-              </button>
-              <button @click.stop="toggleLike(post)" class="flex items-center gap-2 text-sm transition group"
-                :class="hasLiked(post) ? 'text-pink-400' : 'text-gray-600 dark:text-slate-400 hover:text-pink-400'">
-                <svg class="h-5 w-5 transition"
-                  :class="hasLiked(post) ? 'text-pink-500' : 'text-gray-500 dark:text-slate-500 group-hover:text-pink-500'"
-                  :fill="hasLiked(post) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                J'aime ({{ getReactionCount(post) }})
-              </button>
+              <!-- Media Grid -->
+              <div v-if="post.media && post.media.length > 0" class="mb-6 grid gap-2"
+                :class="post.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
+                <AuthImage v-for="(media, index) in post.media" :key="index" :media="media"
+                  img-class="rounded-2xl w-full object-cover border border-gray-100 dark:border-white/5 max-h-[400px]"
+                  alt="Média de la publication" />
+              </div>
+
+              <div class="flex items-center gap-6 pt-6 border-t border-gray-100 dark:border-white/5">
+                <button @click.stop="toggleLike(post)"
+                  class="flex items-center gap-2.5 text-sm font-medium transition-all group"
+                  :class="hasLiked(post) ? 'text-pink-500' : 'text-gray-500 dark:text-slate-400 hover:text-pink-500'">
+                  <div class="p-2 rounded-full transition-colors"
+                    :class="hasLiked(post) ? 'bg-pink-50 dark:bg-pink-500/10' : 'group-hover:bg-pink-50 dark:group-hover:bg-pink-500/10'">
+                    <svg class="h-5 w-5 transition-transform group-active:scale-90"
+                      :class="hasLiked(post) ? 'fill-current' : ''" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <span>{{ getReactionCount(post) || 'J\'aime' }}</span>
+                </button>
+
+                <button @click="selectedPost = post"
+                  class="flex items-center gap-2.5 text-sm font-medium transition-all group text-gray-500 dark:text-slate-400 hover:text-blue-500">
+                  <div
+                    class="p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 transition-colors">
+                    <svg class="h-5 w-5 transition-transform group-active:scale-90" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <span>{{ commentCounts[post.id] > 0 ? commentCounts[post.id] + ' commentaire' +
+                    (commentCounts[post.id] > 1 ? 's' : '') : 'Commenter' }}</span>
+                </button>
+              </div>
             </div>
           </article>
         </div>

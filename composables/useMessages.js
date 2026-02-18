@@ -1,12 +1,14 @@
 export const useMessages = () => {
   const { request } = useAPI()
   const config = useRuntimeConfig()
+  const authStore = useAuthStore()
   
   const messages = ref([])
   const isLoading = ref(false)
   const isSending = ref(false)
 
   const fetchMessages = async (channel) => {
+    if (!authStore.token) return
     isLoading.value = true
     try {
       let filter = {}
