@@ -1,7 +1,7 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const authStore = useAuthStore()
-  
-  // Tente de charger depuis le cookie si pas de token en mémoire
+
+  // Migration: restore from old cookies if needed
   if (!authStore.token) {
     authStore.loadFromCookie()
   }
