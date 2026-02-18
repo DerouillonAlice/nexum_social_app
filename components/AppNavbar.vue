@@ -46,8 +46,9 @@ const handleToggle = () => {
         <template v-if="user">
           <NuxtLink to="/notifications"
             class="hidden md:flex p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/5 relative transition-colors">
-            <div
-              class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border-2 border-white dark:border-[#0f111a]">
+            <div v-if="useNotificationsStore().unreadCount > 0"
+              class="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-red-500 border-2 border-white dark:border-[#0f111a] flex items-center justify-center text-[9px] font-bold text-white">
+              {{ useNotificationsStore().unreadCount > 9 ? '9+' : useNotificationsStore().unreadCount }}
             </div>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

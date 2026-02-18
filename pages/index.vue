@@ -5,6 +5,7 @@ const { fetchUsers, getUserName } = useUsers()
 const { fetchChannels, getChannel, isFavorite, favoriteChannels } = useChannels()
 const { deletePublication } = useMessages()
 const { fetchReactions, toggleLike, hasLiked, getReactionCount } = useReactions()
+const { startPolling, stopPolling } = useNotifications()
 
 const posts = ref([])
 const selectedPost = ref(null)
@@ -12,6 +13,10 @@ const initialLoading = ref(true)
 const showFavoritesOnly = ref(true)
 const openMenuId = ref(null)
 const commentCounts = ref({})
+
+onUnmounted(() => {
+  stopPolling()
+})
 
 const handleDeletePost = async (post) => {
   if (!confirm('Supprimer cette publication ?')) return
@@ -97,6 +102,7 @@ onMounted(async () => {
     await fetchChannels()
     await fetchPosts()
     await fetchReactions()
+    startPolling() // Start polling for notifications
     initialLoading.value = false
   }
 })
