@@ -111,6 +111,7 @@ const submitComment = async () => {
 
     if (response) {
       comments.value.push(response)
+      emit('comment-added')
     }
 
     newComment.value = ''
