@@ -19,19 +19,18 @@ const handleToggle = () => {
     <div class="flex items-center gap-4 sm:gap-12 w-full max-w-7xl mx-auto justify-between">
 
       <!-- Logo Area -->
-      <NuxtLink to="/" class="flex items-center gap-2 group">
+      <NuxtLink to="/" class="flex items-center gap-2 group shrink-0">
         <img src="~/assets/img/logo.png" alt="Nexum Logo"
           class="h-8 w-auto transition-transform duration-300 group-hover:scale-105">
       </NuxtLink>
 
-      <!-- Search Bar (Hidden on mobile, or can be a toggle) -->
-      <div class="flex-1 max-w-md hidden md:block">
+      <div v-if="user" class="flex-1 max-w-md ml-4 md:ml-0">
         <SearchBar />
       </div>
 
-      <!-- Right Actions -->
       <div class="flex items-center gap-3 sm:gap-4">
-        <button @click="handleToggle"
+
+        <button @click="handleToggle" :class="user ? 'hidden md:flex' : 'flex'"
           class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/5 transition-colors"
           title="Thème">
           <svg v-if="isDark" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,7 +45,7 @@ const handleToggle = () => {
 
         <template v-if="user">
           <NuxtLink to="/notifications"
-            class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/5 relative transition-colors">
+            class="hidden md:flex p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/5 relative transition-colors">
             <div
               class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border-2 border-white dark:border-[#0f111a]">
             </div>
@@ -59,9 +58,9 @@ const handleToggle = () => {
           <UserMenu :user="user" />
         </template>
         <template v-else>
-          <div class="flex items-center gap-3">
+          <div class="hidden md:flex items-center gap-3">
             <NuxtLink to="/login"
-              class="hidden sm:block text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors">
+              class="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors">
               Connexion
             </NuxtLink>
             <NuxtLink to="/register"
