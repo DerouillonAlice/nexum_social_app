@@ -25,9 +25,18 @@ const displayName = computed(() => {
     return getUserName(props.user)
 })
 
+const mediaAvatar = computed(() => {
+    if (props.user && typeof props.user === 'object' && props.user.avatar && typeof props.user.avatar === 'object') {
+        return props.user.avatar
+    }
+    return null
+})
+
 const avatarUrl = computed(() => {
     if (props.src) return props.src
-    if (props.user && typeof props.user === 'object' && props.user.avatar) return props.user.avatar
+    if (props.user && typeof props.user === 'object' && props.user.avatar && typeof props.user.avatar === 'string') {
+        return props.user.avatar
+    }
     return null
 })
 
@@ -63,15 +72,21 @@ const textSizeClass = computed(() => {
 
 <template>
     <div 
-        :class="[sizeClass, 'rounded-full flex items-center justify-center shrink-0 overflow-hidden text-white font-bold select-none ring-1 ring-white/10', avatarUrl ? 'bg-black' : bgColor]"
+        :class="[sizeClass, 'rounded-full flex items-center justify-center shrink-0 overflow-hidden text-white font-bold select-none ring-1 ring-white/10 relative', (avatarUrl || mediaAvatar) ? 'bg-black' : bgColor]"
     >
+        <AuthImage 
+            v-if="mediaAvatar"
+            :media="mediaAvatar"
+            :alt="displayName"
+            imgClass="w-full h-full object-cover absolute inset-0"
+        />
         <img 
-            v-if="avatarUrl" 
+            v-else-if="avatarUrl" 
             :src="avatarUrl" 
             :alt="displayName" 
-            class="w-full h-full object-cover"
+            class="w-full h-full object-cover absolute inset-0"
         >
-        <span v-else :class="textSizeClass">
+        <span v-else :class="[textSizeClass, 'relative z-10']">
             {{ initial }}
         </span>
     </div>

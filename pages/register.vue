@@ -1,12 +1,33 @@
 <script setup>
-const { register } = useAPI()
+const { register, login, uploadMedia, updateUser } = useAPI()
+const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const displayName = ref('')
+const avatarFile = ref(null)
 
 const isLoading = ref(false)
 const error = ref(null)
+
+const handleAvatarChange = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    if (!file.type.startsWith('image/')) {
+      error.value = "Le fichier doit être une image."
+      e.target.value = ''
+      avatarFile.value = null
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      error.value = "L'image ne doit pas dépasser 5Mo."
+      e.target.value = ''
+      avatarFile.value = null
+      return
+    }
+    avatarFile.value = file
+  }
+}
 
 const handleRegister = async () => {
   if (!email.value || !password.value || !displayName.value) return
@@ -15,10 +36,32 @@ const handleRegister = async () => {
   error.value = null
 
   try {
+    // 1. Inscription
     await register(email.value, password.value, displayName.value)
 
-    navigateTo('/login')
-    alert('Compte créé avec succès ! Connectez-vous.')
+    // Si on a un avatar, il faut se connecter pour l'uploader et l'attacher au profil
+    if (avatarFile.value) {
+      // 2. Connexion pour avoir le token et l'id
+      await login(email.value, password.value)
+      
+      try {
+        // 3. Upload de l'image
+        const media = await uploadMedia(avatarFile.value)
+        
+        // 4. Update du profil avec le media id
+        if (media && media['@id']) {
+           await updateUser(authStore.user['@id'], { avatar: media['@id'] })
+        }
+      } catch (uploadErr) {
+        console.error("Erreur lors de l'upload de l'avatar :", uploadErr)
+        // On ne bloque pas si l'avatar échoue, le compte est créé
+      }
+      
+      navigateTo('/')
+    } else {
+      navigateTo('/login')
+      alert('Compte créé avec succès ! Connectez-vous.')
+    }
 
   } catch (e) {
     console.error(e)
@@ -31,7 +74,8 @@ const handleRegister = async () => {
 
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 py-8 relative overflow-hidden transition-colors duration-300">
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 
+py-8 relative overflow-hidden transition-colors duration-300">
     <!-- Decorative background elements -->
     <div
       class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[100px] pointer-events-none">
@@ -52,7 +96,8 @@ const handleRegister = async () => {
       <form @submit.prevent="handleRegister" class="space-y-5">
 
         <div v-if="error"
-          class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm p-4 rounded-xl flex items-start gap-3 animate-pulse">
+          class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 
+text-red-600 dark:text-red-400 text-sm p-4 rounded-xl flex items-start gap-3 animate-pulse">
           <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -61,8 +106,15 @@ const handleRegister = async () => {
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nom
-            d'affichage</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Avatar (Optionnel)</label>
+          <div class="relative group">
+            <input type="file" accept="image/*" @change="handleAvatarChange"
+              class="w-full bg-gray-50 dark:bg-slate-950/80 border border-gray-200 dark:border-slate-700/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 cursor-pointer focus:ring-2 focus:ring-blue-500/50 outline-none transition-all" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nom d'affichage</label>
           <div class="relative group">
             <input v-model="displayName" type="text" required
               class="w-full bg-gray-50 dark:bg-slate-950/80 border border-gray-200 dark:border-slate-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-slate-600"
