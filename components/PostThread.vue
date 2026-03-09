@@ -16,6 +16,7 @@ const { getChannel } = useChannels()
 const comments = ref([])
 const newComment = ref('')
 const isSendingComment = ref(false)
+const isLoadingComments = ref(true)
 
 const isMe = (authorIri) => {
   if (!authStore.user || !authorIri) return false
@@ -39,6 +40,7 @@ const formatDate = (dateString) => {
 const fetchComments = async () => {
   if (!props.post) return
 
+  isLoadingComments.value = true
   try {
     const config = useRuntimeConfig()
     const route = useRoute()
@@ -76,6 +78,8 @@ const fetchComments = async () => {
   } catch (e) {
     console.error("Failed to fetch replies", e)
     comments.value = []
+  } finally {
+    isLoadingComments.value = false
   }
 }
 
@@ -124,6 +128,7 @@ const submitComment = async () => {
 
 watch(() => props.post, () => {
   comments.value = []
+  isLoadingComments.value = true
   fetchComments()
 }, { immediate: true })
 </script>
@@ -168,7 +173,9 @@ watch(() => props.post, () => {
 
     <!-- Comments List -->
     <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-gray-50/50 dark:bg-zinc-950/50">
-      <div v-if="comments.length === 0" class="flex flex-col items-center justify-center py-10 text-center opacity-60">
+      <LoadingSpinner v-if="isLoadingComments" />
+
+      <div v-else-if="comments.length === 0" class="flex flex-col items-center justify-center py-10 text-center opacity-60">
         <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-3">
           <svg class="w-6 h-6 text-gray-400 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
