@@ -42,7 +42,7 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-  <div class="h-full flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden">
     <AppSidebar />
 
     <div class="flex-1 overflow-y-auto px-6 py-6">

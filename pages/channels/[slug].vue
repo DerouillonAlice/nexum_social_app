@@ -120,10 +120,10 @@ watch(messages, () => scrollToBottom())
 </script>
 
 <template>
-  <div class="h-full flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden">
     <AppSidebar />
 
-    <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-200">
+    <div class="flex-1 flex flex-col overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-200">
 
       <!-- Error state -->
       <div v-if="channelError" class="flex-1 flex flex-col items-center justify-center text-center p-6">

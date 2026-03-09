@@ -74,8 +74,8 @@ const handleRegister = async () => {
 
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-[#fafafa] dark:bg-[#09090b] px-4 
-py-8 relative overflow-hidden transition-colors duration-300">
+    class="flex-1 flex items-center justify-center bg-[#fafafa] dark:bg-[#09090b] px-4 
+py-8 relative overflow-hidden overflow-y-auto transition-colors duration-300">
     <!-- Decorative background elements -->
     <div
       class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-gray-200/50 dark:bg-zinc-800/30 rounded-full blur-[100px] pointer-events-none">

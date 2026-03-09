@@ -162,8 +162,7 @@ const filteredPosts = computed(() => {
 </script>
 
 <template>
-  <div class="flex overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-100"
-    style="height: calc(100vh - 3.5rem);">
+  <div class="flex flex-1 overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-100">
     <template v-if="authStore.user">
       <AppSidebar />
 

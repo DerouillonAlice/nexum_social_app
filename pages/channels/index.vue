@@ -75,10 +75,10 @@ const createChannel = async () => {
 </script>
 
 <template>
-  <div class="h-full flex flex-1 overflow-hidden bg-[#fafafa] dark:bg-[#09090b]">
+  <div class="flex flex-1 overflow-hidden bg-[#fafafa] dark:bg-[#09090b]">
     <AppSidebar />
 
-    <div class="flex-1 flex flex-col h-full overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Header -->
       <div class="flex-none bg-white/80 dark:bg-zinc-900/50 backdrop-blur-md border-b border-gray-200/60 dark:border-zinc-800/60 px-6 py-4">
         <div class="max-w-4xl mx-auto">

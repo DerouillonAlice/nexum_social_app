@@ -9,7 +9,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 flex flex-col">
+  <div class="h-screen bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 flex flex-col overflow-hidden">
     <AppNavbar :user="authStore?.user" />
     <main class="flex-1 flex flex-col overflow-hidden">
       <slot />
