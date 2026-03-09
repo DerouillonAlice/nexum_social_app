@@ -29,9 +29,26 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Media has no path' })
   }
 
+  // Extrait l'ID de la publication pour tester les routes du prof, ex: "/api/ws-e/publications/232" -> "232"
+  const pubMatch = meta?.publication ? meta.publication.match(/\d+$/) : null;
+  const pubId = pubMatch ? pubMatch[0] : '';
+  const mediaId = meta?.id || id;
+
   // Step 2: Try to fetch the actual file from known Symfony public paths
   const domainBase = config.public.apiBaseUrl.replace(/\/api$/, '')
   const candidatePaths = [
+    // La route exacte demandée : uploads/ws-e/idimg.jpg etc.
+    `${domainBase}/uploads/ws-e/${mediaPath}`,
+    `${domainBase}/upload/ws-e/${mediaPath}`,
+    `${domainBase}/uploads/ws-e/${mediaId}.jpg`,
+    `${domainBase}/upload/ws-e/${mediaId}.jpg`,
+
+    // Les autres routes alternatives testées précédemment
+    `${domainBase}/upload/ws-e/${pubId}/${mediaPath}`,
+    `${domainBase}/uploads/ws-e/${pubId}/${mediaPath}`,
+    `${domainBase}/upload/ws-e/${mediaId}/${mediaPath}`,
+    `${domainBase}/uploads/ws-e/${mediaId}/${mediaPath}`,
+
     // contentUrl fourni par API Platform (chemin le plus fiable)
     ...(meta?.contentUrl ? [`${domainBase}${meta.contentUrl.startsWith('/') ? '' : '/'}${meta.contentUrl}`] : []),
     `${domainBase}/media/${mediaPath}`,

@@ -3,10 +3,10 @@ export const useUsers = () => {
   
   const users = useState('users', () => [])
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (force = false) => {
+    if (users.value.length > 0 && !force) return
 
     try {
-
       let allUsers = []
       let page = 1
       let hasMore = true
@@ -33,7 +33,7 @@ export const useUsers = () => {
 
       users.value = allUsers
     } catch (e) {
-      console.error('DEBUG fetchUsers ERROR:', e)
+      console.error('Error fetching users:', e)
     }
   }
 
@@ -51,11 +51,16 @@ export const useUsers = () => {
 
     const idToCheck = authorId.toString().split('/').pop() 
     const user = users.value.find(u => {
-      const uId = u['@id'].split('/').pop()
+      const uId = u['@id'] ? u['@id'].split('/').pop() : ''
       return uId === idToCheck
     })
     
-    return user ? user.displayName : 'Inconnu'
+    if (!user) {
+        // console.warn(`[useUsers] User not found for ID: ${idToCheck}. Users loaded: ${users.value.length}`)
+        return 'Inconnu'
+    }
+    
+    return user.displayName
   }
 
   return { users, fetchUsers, getUserName }
