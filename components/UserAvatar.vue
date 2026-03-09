@@ -60,7 +60,7 @@ const bgColor = computed(() => {
         'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500', 
         'bg-pink-500', 'bg-rose-500'
     ]
-    if (!displayName.value || displayName.value === 'Anonyme' || displayName.value === 'Inconnu') return 'bg-slate-600'
+    if (!displayName.value || displayName.value === 'Anonyme' || displayName.value === 'Inconnu') return 'bg-zinc-600'
     
     let hash = 0
     for (let i = 0; i < displayName.value.length; i++) {

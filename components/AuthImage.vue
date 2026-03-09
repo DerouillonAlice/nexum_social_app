@@ -22,7 +22,7 @@ watch(() => props.media?.id, () => { error.value = false })
 <template>
     <img v-if="imgSrc && !error" :src="imgSrc" :alt="alt" :class="imgClass" @error="error = true" />
     <div v-else-if="error"
-        class="inline-flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-lg text-gray-400 dark:text-slate-500 text-xs px-3 py-2">
+        class="inline-flex items-center gap-1 bg-gray-100 dark:bg-zinc-800 rounded-lg text-gray-400 dark:text-zinc-500 text-xs px-3 py-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
@@ -31,5 +31,5 @@ watch(() => props.media?.id, () => { error.value = false })
         </svg>
         Image non disponible
     </div>
-    <div v-else class="inline-block bg-gray-100 dark:bg-slate-800 rounded-lg animate-pulse h-20 w-20" />
+    <div v-else class="inline-block bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse h-20 w-20" />
 </template>
