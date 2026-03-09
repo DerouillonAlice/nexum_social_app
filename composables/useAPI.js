@@ -1,6 +1,6 @@
 export const useAPI = () => {
   const config = useRuntimeConfig()
-  const authStore = useAuthStore() 
+  const authStore = useAuthStore()
 
   const request = async (url, options = {}) => {
     const baseURL = options.ignoreSlug 
@@ -81,7 +81,7 @@ const login = async (email, password) => {
       console.log('Login: selected profile', myProfile)
       
       if (myProfile) {
-        authStore.setAuth(data.token, myProfile) 
+        authStore.setAuth(data.token, myProfile)
       } 
     } catch (e) {
       console.error("Erreur récupération profil", e)
