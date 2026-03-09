@@ -170,19 +170,20 @@ const filteredPosts = computed(() => {
       <div class="flex-1 overflow-y-auto px-6 py-6 border-r border-gray-200/60 dark:border-zinc-800/60 relative min-w-0 custom-scrollbar">
         <div class="mx-auto space-y-6 max-w-2xl">
 
-          <LoadingSpinner v-if="initialLoading" class="mb-10" />
-          <PublicationComposer v-else :show-channel-selector="true" @posted="fetchPosts" />
+          <PublicationComposer v-if="!initialLoading" :show-channel-selector="true" @posted="fetchPosts" />
 
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-zinc-200">Publications</h2>
-            <button @click="showFavoritesOnly = !showFavoritesOnly"
+            <button v-if="!initialLoading" @click="showFavoritesOnly = !showFavoritesOnly"
               class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
-              :class="showFavoritesOnly ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">>
+              :class="showFavoritesOnly ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
               {{ showFavoritesOnly ? '★ Favoris' : '☆ Tout' }}
             </button>
           </div>
 
-          <div v-if="filteredPosts.length === 0 && !initialLoading"
+          <LoadingSpinner v-if="initialLoading" />
+
+          <div v-else-if="filteredPosts.length === 0"
             class="text-center py-12 text-gray-400 dark:text-zinc-600">
             <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications ici.</p>
             <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
@@ -191,7 +192,7 @@ const filteredPosts = computed(() => {
 
           <article v-for="post in filteredPosts" :key="post.id"
             class="group bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200/60 dark:border-zinc-800/60 hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200 relative"
-            :class="selectedPost?.id === post.id ? 'ring-2 ring-zinc-400/40 dark:ring-zinc-500/40' : ''">>
+            :class="selectedPost?.id === post.id ? 'ring-2 ring-zinc-400/40 dark:ring-zinc-500/40' : ''">
 
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
@@ -308,19 +309,130 @@ const filteredPosts = computed(() => {
 
     </template>
     <template v-else>
-      <div class="w-full h-full flex flex-col items-center justify-center text-center px-4">
-        <h1 class="text-5xl font-bold text-gray-900 dark:text-zinc-100 mb-6">L'espace de travail du futur</h1>
-        <p class="text-lg text-gray-500 dark:text-zinc-500 max-w-xl mb-10">
-          Connectez vos équipes, rationalisez vos flux de travail et centralisez vos communications.
-        </p>
-        <div class="flex gap-3">
-          <NuxtLink to="/login" class="px-6 py-2.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 rounded-xl font-medium text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all">
-            Se connecter
-          </NuxtLink>
-          <NuxtLink to="/register" class="px-6 py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-sm transition-all hover:bg-zinc-800 dark:hover:bg-zinc-200 hover:-translate-y-0.5 active:translate-y-0">
-            Commencer
-          </NuxtLink>
-        </div>
+      <div class="w-full h-full overflow-y-auto custom-scrollbar">
+
+        <!-- Hero Section -->
+        <section class="relative flex flex-col items-center justify-center text-center px-6 py-28 lg:py-36">
+          <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-20 left-1/4 w-72 h-72 bg-zinc-200/40 dark:bg-zinc-800/30 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-1/4 w-96 h-96 bg-zinc-300/30 dark:bg-zinc-700/20 rounded-full blur-3xl"></div>
+          </div>
+
+          <div class="relative z-10 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-xs font-medium text-gray-500 dark:text-zinc-400 mb-8 backdrop-blur-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Plateforme open source
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-zinc-100 tracking-tight leading-tight mb-6">
+              Communiquez <br class="hidden sm:block">simplement.
+            </h1>
+            <p class="text-lg text-gray-500 dark:text-zinc-500 max-w-xl mx-auto mb-10 leading-relaxed">
+              Nexum réunit vos équipes dans un espace de discussion intuitif. Salons, publications, commentaires — tout ce dont vous avez besoin, sans superflu.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <NuxtLink to="/register" class="px-7 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-sm transition-all hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-95 w-full sm:w-auto">
+                Créer un compte
+              </NuxtLink>
+              <NuxtLink to="/login" class="px-7 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl font-medium text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all w-full sm:w-auto">
+                Se connecter
+              </NuxtLink>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="px-6 py-20 border-t border-gray-100 dark:border-zinc-900">
+          <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+              <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4">Tout est pensé pour la simplicité</h2>
+              <p class="text-gray-500 dark:text-zinc-500 max-w-lg mx-auto">Des outils essentiels, une interface épurée. Rien de trop.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Feature 1 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Salons de discussion</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Créez des salons thématiques pour organiser vos conversations par projet, équipe ou sujet.</p>
+              </div>
+
+              <!-- Feature 2 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Publications & médias</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Partagez du texte et des images. Vos publications sont visibles par tous les membres du salon.</p>
+              </div>
+
+              <!-- Feature 3 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Favoris & flux personnalisé</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Suivez vos salons préférés et retrouvez un fil d'actualité filtré selon vos centres d'intérêt.</p>
+              </div>
+
+              <!-- Feature 4 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Réactions & commentaires</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Réagissez aux publications, commentez et engagez la conversation avec votre communauté.</p>
+              </div>
+
+              <!-- Feature 5 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Recherche globale</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Retrouvez n'importe quel utilisateur, salon ou publication en un instant grâce à la recherche intégrée.</p>
+              </div>
+
+              <!-- Feature 6 -->
+              <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Mode sombre</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Interface adaptée à vos préférences avec un thème clair et sombre, pour un confort visuel optimal.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="px-6 py-20 border-t border-gray-100 dark:border-zinc-900">
+          <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4">Prêt à rejoindre la conversation ?</h2>
+            <p class="text-gray-500 dark:text-zinc-500 mb-8">Créez votre compte en quelques secondes et commencez à échanger avec votre communauté.</p>
+            <NuxtLink to="/register" class="inline-flex px-8 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-sm transition-all hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-95">
+              Commencer gratuitement
+            </NuxtLink>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="px-6 py-8 border-t border-gray-100 dark:border-zinc-900 text-center">
+          <p class="text-xs text-gray-400 dark:text-zinc-600">Nexum — Projet universitaire IUT · {{ new Date().getFullYear() }}</p>
+        </footer>
       </div>
     </template>
   </div>

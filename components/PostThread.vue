@@ -219,7 +219,7 @@ watch(() => props.post, () => {
             @keydown.enter.exact.prevent="submitComment"></textarea>
 
           <button type="submit" :disabled="isSendingComment || !newComment.trim()"
-            class="absolute right-2 bottom-2 p-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl transition disabled:opacity-50 disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed shadow-md disabled:shadow-none">
+            class="absolute right-2 bottom-2 p-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl transition disabled:opacity-50 disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed">
             <svg v-if="isSendingComment" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

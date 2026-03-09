@@ -82,7 +82,7 @@ const createChannel = async () => {
               </svg>
             </button>
             <button @click="showModal = true"
-              class="px-5 py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold text-sm transition shadow-lg shadow-zinc-900/20 hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-2 transform active:scale-95">
+              class="px-5 py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold text-sm transition hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-2 transform active:scale-95">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
               </svg>
@@ -92,7 +92,11 @@ const createChannel = async () => {
         </div>
 
         <div v-if="pending" class="flex justify-center py-20">
-          <div class="animate-spin rounded-full h-8 w-8 border-2 border-zinc-800 dark:border-zinc-200 border-t-transparent"></div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce [animation-delay:-0.3s]"></span>
+            <span class="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce [animation-delay:-0.15s]"></span>
+            <span class="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"></span>
+          </div>
         </div>
 
         <div v-else-if="error"
@@ -133,7 +137,7 @@ const createChannel = async () => {
             </div>
 
             <div
-              class="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xl font-bold mb-4 shadow-lg shadow-zinc-900/20">
+              class="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xl font-bold mb-4">
               {{ channel.name.charAt(0).toUpperCase() }}
             </div>
 
@@ -210,7 +214,7 @@ const createChannel = async () => {
             <button type="button" @click="showModal = false"
               class="px-5 py-2.5 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition">Annuler</button>
             <button type="submit" :disabled="isCreating"
-              class="px-6 py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold transition shadow-lg shadow-zinc-900/20 hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+              class="px-6 py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold transition hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
               <span v-if="isCreating"
                 class="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full"></span>
               Créer le salon
