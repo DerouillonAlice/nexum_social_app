@@ -4,10 +4,16 @@ export const useChannels = () => {
     const { request } = useAPI()
     const channels = useState('channels', () => [])
     const favoriteIds = useState('favoriteChannelIds', () => new Set())
-    
-    const loadFavoritesFromUser = () => {
-        if (authStore.user && authStore.user.channelsFavoris) {
-            const ids = authStore.user.channelsFavoris.map(iri => {
+
+    // Charge les favoris depuis l'API /users/{id} (channelsFavoris n'est pas dans le store auth)
+    const loadFavoritesFromAPI = async () => {
+        if (!authStore.user) return
+        try {
+            const userId = authStore.user['@id']?.split('/').pop() || authStore.user.id
+            if (!userId) return
+            const userData = await request(`/users/${userId}`, { ignoreSlug: true })
+            const favList = userData?.channelsFavoris || []
+            const ids = favList.map(iri => {
                 if (typeof iri === 'string') {
                     const match = iri.match(/\/(\d+)$/)
                     return match ? parseInt(match[1]) : null
@@ -15,17 +21,19 @@ export const useChannels = () => {
                 return iri.id || null
             }).filter(id => id !== null)
             favoriteIds.value = new Set(ids)
+        } catch (e) {
+            console.error('Error loading favorites from API', e)
         }
     }
-    
+
     const fetchChannels = async () => {
         try {
             const data = await request('/channels')
             const rawChannels = data.member || data['hydra:member'] || []
             channels.value = rawChannels
-            
-            loadFavoritesFromUser()
-            
+
+            await loadFavoritesFromAPI()
+
             return channels.value
         } catch (e) {
             console.error('Error fetching channels', e)
@@ -98,6 +106,6 @@ export const useChannels = () => {
         getChannel,
         isFavorite,
         toggleFavorite,
-        loadFavoritesFromUser
+        loadFavoritesFromAPI
     }
 }
