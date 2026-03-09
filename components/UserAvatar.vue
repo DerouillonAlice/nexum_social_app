@@ -63,6 +63,7 @@ const bgColor = computed(() => {
 })
 
 const textSizeClass = computed(() => {
+    if (props.sizeClass.includes('w-32') || props.sizeClass.includes('h-32')) return 'text-4xl'
     if (props.sizeClass.includes('w-16') || props.sizeClass.includes('h-16')) return 'text-xl'
     if (props.sizeClass.includes('w-12') || props.sizeClass.includes('h-12')) return 'text-lg'
     if (props.sizeClass.includes('w-10') || props.sizeClass.includes('h-10')) return 'text-sm'

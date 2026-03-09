@@ -54,15 +54,11 @@ const formatDate = (dateString) => {
           <div class="bg-white dark:bg-[#151725] rounded-2xl p-8 border border-gray-200 dark:border-white/5">
             <div class="flex items-start gap-6">
               <!-- Avatar -->
-              <div
-                class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 dark:bg-slate-800 border-4 border-gray-300 dark:border-slate-700 flex-shrink-0">
-                <img v-if="authStore.user?.avatar?.contentUrl" :src="authStore.user.avatar.contentUrl" alt="Avatar"
-                  class="w-full h-full object-cover" />
-                <div v-else
-                  class="w-full h-full flex items-center justify-center text-4xl text-gray-400 dark:text-slate-500">
-                  {{ authStore.user?.displayName?.[0]?.toUpperCase() || '?' }}
-                </div>
-              </div>
+              <UserAvatar 
+                :user="authStore.user" 
+                sizeClass="w-32 h-32"
+                class="border-4 border-gray-300 dark:border-slate-700"
+              />
 
               <!-- User Info -->
               <div class="flex-1">
