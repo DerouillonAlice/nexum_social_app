@@ -63,5 +63,24 @@ export const useUsers = () => {
     return user.displayName
   }
 
-  return { users, fetchUsers, getUserName }
+  const getUser = (iri) => {
+    if (!iri) return null
+    
+    let authorId = iri 
+    if (typeof iri === 'object') {
+      authorId = iri['@id']
+    }
+    
+    if (!authorId) return null
+
+    const idToCheck = authorId.toString().split('/').pop() 
+    const user = users.value.find(u => {
+      const uId = u['@id'] ? u['@id'].split('/').pop() : ''
+      return uId === idToCheck
+    })
+    
+    return user || null
+  }
+
+  return { users, fetchUsers, getUserName, getUser }
 }

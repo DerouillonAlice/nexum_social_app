@@ -18,7 +18,11 @@ const props = defineProps({
   }
 })
 
-const { getUserName } = useUsers()
+const { getUserName, getUser } = useUsers()
+
+const fullUser = computed(() => {
+    return getUser(props.user) || props.user
+})
 
 const displayName = computed(() => {
     if (props.name) return props.name
@@ -26,16 +30,19 @@ const displayName = computed(() => {
 })
 
 const mediaAvatar = computed(() => {
-    if (props.user && typeof props.user === 'object' && props.user.avatar && typeof props.user.avatar === 'object') {
-        return props.user.avatar
+    const u = fullUser.value
+    if (u && typeof u === 'object' && u.avatar && typeof u.avatar === 'object') {
+        return u.avatar
     }
     return null
 })
 
 const avatarUrl = computed(() => {
     if (props.src) return props.src
-    if (props.user && typeof props.user === 'object' && props.user.avatar && typeof props.user.avatar === 'string') {
-        return props.user.avatar
+    const u = fullUser.value
+    // Si l'avatar est juste une string (lien classique)
+    if (u && typeof u === 'object' && u.avatar && typeof u.avatar === 'string') {
+        return u.avatar
     }
     return null
 })
