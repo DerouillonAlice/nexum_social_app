@@ -83,7 +83,7 @@ onMounted(async () => {
         {{ channel.name.charAt(0).toUpperCase() }}
       </NuxtLink>
 
-      <NuxtLink to="/channels" class="flex items-center justify-center w-11 h-11 rounded-xl border-2 border-dashed border-gray-300 dark:border-zinc-700 text-gray-400 dark:text-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all duration-200" title="Rejoindre un espace" aria-label="Rejoindre un espace">
+      <NuxtLink to="/channels#create" class="flex items-center justify-center w-11 h-11 rounded-xl border-2 border-dashed border-gray-300 dark:border-zinc-700 text-gray-400 dark:text-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all duration-200" title="Créer un espace" aria-label="Créer un espace">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>

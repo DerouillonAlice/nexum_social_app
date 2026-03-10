@@ -135,6 +135,12 @@ const isMe = (authorIri) => {
   return authorId === myId
 }
 
+const getUserId = (authorIri) => {
+  if (!authorIri) return null
+  const iri = typeof authorIri === 'object' ? authorIri['@id'] : authorIri
+  return iri ? iri.toString().split('/').pop() : null
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -229,10 +235,16 @@ const filteredPosts = computed(() => {
 
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
-                <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-full" />
+                <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" @click.stop>
+                  <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-full" class="hover:ring-2 hover:ring-zinc-400/50 transition-all" />
+                </NuxtLink>
+                <UserAvatar v-else :user="post.author" sizeClass="h-10 w-10 rounded-full" />
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-                    {{ getUserName(post.author) }}
+                    <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" class="hover:underline transition-colors" @click.stop>
+                      {{ getUserName(post.author) }}
+                    </NuxtLink>
+                    <span v-else>{{ getUserName(post.author) }}</span>
                     <span v-if="isMe(post.author)" class="px-1.5 py-0.5 rounded-md text-[10px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold uppercase tracking-wide">Vous</span>
                   </h3>
                   <div class="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-zinc-400">

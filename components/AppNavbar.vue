@@ -14,7 +14,7 @@ const handleToggle = () => {
 </script>
 
 <template>
-  <header role="banner" class="h-14 flex items-center justify-between px-4 sm:px-6 bg-white dark:bg-[#0a0a0c] border-b border-gray-200/60 dark:border-zinc-800/60 flex-shrink-0 z-30 sticky top-0">
+  <header role="banner" class="h-14 flex items-center justify-between pl-14 md:pl-4 pr-4 sm:px-6 bg-white dark:bg-[#0a0a0c] border-b border-gray-200/60 dark:border-zinc-800/60 flex-shrink-0 z-30 sticky top-0">
 
     <nav aria-label="Navigation principale" class="flex items-center gap-4 sm:gap-8 w-full justify-between">
       <!-- Logo -->

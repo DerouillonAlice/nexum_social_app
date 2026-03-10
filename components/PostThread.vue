@@ -25,6 +25,12 @@ const isMe = (authorIri) => {
   return authorId === myId
 }
 
+const getUserId = (authorIri) => {
+  if (!authorIri) return null
+  const iri = typeof authorIri === 'object' ? authorIri['@id'] : authorIri
+  return iri ? iri.toString().split('/').pop() : null
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -159,7 +165,10 @@ const deleteComment = async (comment) => {
           <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-xl" />
           <div>
             <h3 class="text-sm font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-              {{ getUserName(post.author) }}
+              <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" class="hover:underline transition-colors">
+                {{ getUserName(post.author) }}
+              </NuxtLink>
+              <span v-else>{{ getUserName(post.author) }}</span>
               <span v-if="isMe(post.author)"
                 class="px-1.5 py-0.5 rounded-md text-[10px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold uppercase tracking-wide">Vous</span>
             </h3>
@@ -209,7 +218,11 @@ const deleteComment = async (comment) => {
         <div class="flex flex-col max-w-[85%] min-w-[20%]"
           :class="[isMe(comment.author) ? 'items-end' : 'items-start']">
           <div class="flex items-center gap-2 mb-1 px-1">
-            <span class="text-[11px] font-bold text-gray-700 dark:text-zinc-300">
+            <NuxtLink v-if="!isMe(comment.author) && getUserId(comment.author)" :to="`/profile/${getUserId(comment.author)}`"
+              class="text-[11px] font-bold text-gray-700 dark:text-zinc-300 hover:underline transition-colors">
+              {{ getUserName(comment.author) }}
+            </NuxtLink>
+            <span v-else class="text-[11px] font-bold text-gray-700 dark:text-zinc-300">
               {{ isMe(comment.author) ? 'Vous' : getUserName(comment.author) }}
             </span>
             <span class="text-[10px] text-gray-500 dark:text-zinc-400">

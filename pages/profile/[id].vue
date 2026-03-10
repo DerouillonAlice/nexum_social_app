@@ -62,10 +62,10 @@ const formatDate = (dateString) => {
         
         <div v-else-if="user" class="space-y-6">
           <!-- Profile Header -->
-          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
-            <div class="flex items-start gap-6">
+          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-zinc-800">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
               <!-- Avatar -->
-              <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-zinc-800 border-4 border-gray-200 dark:border-zinc-700 flex-shrink-0">
+              <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-zinc-800 border-4 border-gray-200 dark:border-zinc-700 flex-shrink-0">
                 <img 
                   v-if="user.avatar?.contentUrl" 
                   :src="user.avatar.contentUrl" 
@@ -78,8 +78,8 @@ const formatDate = (dateString) => {
               </div>
 
               <!-- User Info -->
-              <div class="flex-1">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4">{{ user.displayName }}</h1>
+              <div class="flex-1 min-w-0 w-full text-center sm:text-left">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4 truncate">{{ user.displayName }}</h1>
 
                 <div class="space-y-2 text-gray-700 dark:text-zinc-300">
                   <div v-if="user.prenom || user.nom" class="flex items-center gap-2">
@@ -127,6 +127,15 @@ const formatDate = (dateString) => {
               >
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">{{ publication.title }}</h3>
                 <p class="text-gray-500 dark:text-zinc-400 text-sm mb-2">{{ publication.body }}</p>
+
+                <!-- Media -->
+                <div v-if="publication.media && publication.media.length > 0" class="mb-3 grid gap-2"
+                  :class="publication.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
+                  <AuthImage v-for="(media, index) in publication.media" :key="index" :media="media"
+                    img-class="rounded-xl w-full object-cover border border-gray-100 dark:border-zinc-800 max-h-[200px]"
+                    alt="Média de la publication" />
+                </div>
+
                 <div class="text-xs text-gray-400 dark:text-zinc-600">
                   {{ formatDate(publication.createdAt) }}
                 </div>

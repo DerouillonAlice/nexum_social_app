@@ -3,10 +3,12 @@ definePageMeta({ middleware: 'auth' })
 
 const authStore = useAuthStore()
 const { getCurrentUser } = useAPI()
-const { deletePublication } = useMessages()
+const { deletePublication, editPublication } = useMessages()
 
 const isLoading = ref(true)
 const openMenuId = ref(null)
+const editingPubId = ref(null)
+const editingBody = ref('')
 
 onMounted(async () => {
   try {
@@ -34,6 +36,39 @@ const handleDeletePublication = async (publication) => {
   openMenuId.value = null
 }
 
+const startEditing = (publication) => {
+  editingPubId.value = publication.id || publication['@id']?.split('/').pop()
+  editingBody.value = publication.body || ''
+  openMenuId.value = null
+}
+
+const cancelEditing = () => {
+  editingPubId.value = null
+  editingBody.value = ''
+}
+
+const saveEditing = async (publication) => {
+  if (!editingBody.value.trim()) return
+  const updated = await editPublication(publication, editingBody.value.trim())
+  if (updated) {
+    const idx = authStore.user.publications.findIndex(
+      p => (p.id || p['@id']?.split('/').pop()) === (publication.id || publication['@id']?.split('/').pop())
+    )
+    if (idx !== -1) {
+      authStore.user.publications[idx] = {
+        ...authStore.user.publications[idx],
+        body: updated.body || editingBody.value.trim()
+      }
+    }
+  }
+  editingPubId.value = null
+  editingBody.value = ''
+}
+
+const getPubId = (publication) => {
+  return publication.id || publication['@id']?.split('/').pop()
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -51,21 +86,21 @@ const formatDate = (dateString) => {
 
         <div v-else class="space-y-6">
           <!-- Profile Header -->
-          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
-            <div class="flex items-start gap-6">
+          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-zinc-800">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
               <!-- Avatar -->
               <UserAvatar 
                 :user="authStore.user" 
-                sizeClass="w-32 h-32"
-                class="border-4 border-gray-200 dark:border-zinc-700"
+                sizeClass="w-24 h-24 sm:w-32 sm:h-32"
+                class="border-4 border-gray-200 dark:border-zinc-700 shrink-0"
               />
 
               <!-- User Info -->
-              <div class="flex-1">
-                <div class="flex items-center justify-between mb-4">
-                  <h1 class="text-3xl font-bold text-gray-900 dark:text-zinc-100">{{ authStore.user?.displayName }}</h1>
+              <div class="flex-1 min-w-0 w-full text-center sm:text-left">
+                <div class="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3 mb-4">
+                  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 truncate">{{ authStore.user?.displayName }}</h1>
                   <NuxtLink to="/settings"
-                    class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-900 dark:text-zinc-100 rounded-xl text-sm font-medium transition">
+                    class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-900 dark:text-zinc-100 rounded-xl text-sm font-medium transition shrink-0">
                     Modifier le profil
                   </NuxtLink>
                 </div>
@@ -116,21 +151,28 @@ const formatDate = (dateString) => {
 
             <div v-else class="space-y-4">
               <div v-for="publication in userPublications" :key="publication['@id'] || publication.id"
-                class="p-4 bg-gray-50 dark:bg-zinc-950 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 transition relative">
+                class="p-4 bg-gray-50 dark:bg-zinc-950 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 transition relative group">
                 <div class="flex justify-between items-start">
                   <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">{{ publication.title }}</h3>
                   <div class="relative">
-                    <button @click="openMenuId = openMenuId === publication.id ? null : publication.id"
+                    <button @click="openMenuId = openMenuId === getPubId(publication) ? null : getPubId(publication)"
                       class="p-1 text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition">
                       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
                     </button>
-                    <div v-if="openMenuId === publication.id"
+                    <div v-if="openMenuId === getPubId(publication)"
                       class="absolute right-0 top-8 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xl z-10 min-w-[120px]">
+                      <button @click="startEditing(publication)"
+                        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-t-xl transition">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Modifier
+                      </button>
                       <button @click="handleDeletePublication(publication)"
-                        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition">
+                        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-b-xl transition">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -140,7 +182,33 @@ const formatDate = (dateString) => {
                     </div>
                   </div>
                 </div>
-                <p class="text-gray-500 dark:text-zinc-400 text-sm mb-2">{{ publication.body }}</p>
+
+                <!-- Edit mode -->
+                <div v-if="editingPubId === getPubId(publication)" class="mb-3">
+                  <textarea v-model="editingBody" rows="3"
+                    class="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none resize-none transition-all"></textarea>
+                  <div class="flex items-center gap-2 mt-2 justify-end">
+                    <button @click="cancelEditing"
+                      class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 bg-gray-100 dark:bg-zinc-800 rounded-lg transition-colors">
+                      Annuler
+                    </button>
+                    <button @click="saveEditing(publication)" :disabled="!editingBody.trim()"
+                      class="px-3 py-1.5 text-xs font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+
+                <p v-else class="text-gray-500 dark:text-zinc-400 text-sm mb-2">{{ publication.body }}</p>
+
+                <!-- Media -->
+                <div v-if="publication.media && publication.media.length > 0" class="mb-3 grid gap-2"
+                  :class="publication.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
+                  <AuthImage v-for="(media, index) in publication.media" :key="index" :media="media"
+                    img-class="rounded-xl w-full object-cover border border-gray-100 dark:border-zinc-800 max-h-[200px]"
+                    alt="Média de la publication" />
+                </div>
+
                 <div class="text-xs text-gray-400 dark:text-zinc-600">
                   {{ formatDate(publication.createdAt) }}
                 </div>

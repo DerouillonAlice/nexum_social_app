@@ -34,6 +34,21 @@ const searchQuery = ref('')
 const channelToDelete = ref(null)
 const isDeleting = ref(false)
 
+const route = useRoute()
+
+// Auto-open create modal if navigated with #create
+onMounted(() => {
+  if (route.hash === '#create') {
+    showModal.value = true
+  }
+})
+
+watch(() => route.hash, (hash) => {
+  if (hash === '#create') {
+    showModal.value = true
+  }
+})
+
 const filteredChannels = computed(() => {
   if (!channels.value) return []
   if (!searchQuery.value.trim()) return channels.value
