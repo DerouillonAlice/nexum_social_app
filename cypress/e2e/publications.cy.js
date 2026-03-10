@@ -1,77 +1,49 @@
 describe('Publication Flow', () => {
   beforeEach(() => {
-    // Mock Login
-    cy.intercept('POST', /\/login/, {
-      statusCode: 200,
-      body: { token: 'fake-token-123' }
-    }).as('loginSuccess')
+    // Login via API directe et injection dans les cookies pour Pinia persist
+    cy.request({
+      method: 'POST',
+      url: 'https://wra506d.davidannebicque.ovh/api/login',
+      body: { email: 'alice@example.com', password: 'password123' },
+      headers: { 'Content-Type': 'application/json' }
+    }).then((response) => {
+      const token = response.body.token
 
-    // Mock User Fetch
-    cy.intercept('GET', /\/users/, {
-      statusCode: 200,
-      body: {
-        'hydra:member': [
-          {
-            '@id': '/api/users/1',
-            id: 1,
-            email: 'alice@example.com',
-            displayName: 'Alice'
-          }
-        ]
-      }
-    }).as('getUser')
+      const piniaState = JSON.stringify({
+        token: token,
+        user: {
+          id: 125,
+          '@id': '/api/users/125',
+          email: 'alice@example.com',
+          displayName: 'Alice'
+        }
+      })
 
-    // Login via UI (using mocks)
-    cy.visit('/login')
-    cy.get('input[type="email"]').type('alice@example.com')
-    cy.get('input[type="password"]').type('password123')
-    cy.get('button[type="submit"]').click()
-    cy.location('pathname').should('eq', '/')
+      // pinia-plugin-persistedstate stocke dans un cookie nommé d'après le store
+      cy.setCookie('auth', encodeURIComponent(piniaState))
+      cy.visit('/')
+    })
   })
 
+  it('affiche le compositeur de publication', () => {
+    cy.get('textarea', { timeout: 30000 }).should('be.visible')
+    cy.contains('button', 'Publier').should('exist')
+  })
 
-  it('should create a new publication', () => {
-    const postContent = `Test publication ${Date.now()}`
+  it('crée une nouvelle publication', () => {
+    const postContent = 'Test E2E Cypress ' + Date.now()
 
-    // Mock Post Creation
-    cy.intercept('POST', /\/messages/, {
-      statusCode: 201,
-      body: {
-        id: 100,
-        content: postContent,
-        author: { displayName: 'Alice' },
-        createdAt: new Date().toISOString()
-      }
-    }).as('createPost')
+    // Attendre que la page soit chargée
+    cy.get('textarea', { timeout: 30000 }).should('be.visible')
 
-    // Mock Feed Refresh (GET messages)
-    cy.intercept('GET', /\/messages/, (req) => {
-        req.reply({
-            statusCode: 200,
-            body: {
-                'hydra:member': [
-                    {
-                        id: 100,
-                        content: postContent,
-                        author: { displayName: 'Alice' },
-                        createdAt: new Date().toISOString()
-                    }
-                ]
-            }
-        })
-    }).as('getFeed')
+    // Écrire dans le compositeur
+    cy.get('textarea').type(postContent)
 
-    // 2. Find publication composer
-    cy.get('textarea[placeholder="Quoi de neuf ?"]').should('be.visible')
-
-    // 3. Type content
-    cy.get('textarea[placeholder="Quoi de neuf ?"]').type(postContent)
-
-    // 4. Click publish button
+    // Cliquer sur Publier
     cy.contains('button', 'Publier').click()
 
-    // 5. Verify post appeared (mocked)
-    cy.contains(postContent).should('be.visible')
+    // Vérifier que la publication apparaît dans le feed
+    cy.contains(postContent, { timeout: 15000 }).should('be.visible')
   })
 })
 
