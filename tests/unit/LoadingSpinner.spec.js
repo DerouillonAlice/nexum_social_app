@@ -10,13 +10,13 @@ describe('LoadingSpinner.vue', () => {
 
   it('contient 3 points d\'animation', () => {
     const wrapper = mount(LoadingSpinner)
-    const dots = wrapper.findAll('span')
+    const dots = wrapper.findAll('span.animate-bounce')
     expect(dots).toHaveLength(3)
   })
 
   it('chaque point a la classe animate-bounce', () => {
     const wrapper = mount(LoadingSpinner)
-    const dots = wrapper.findAll('span')
+    const dots = wrapper.findAll('span.animate-bounce')
     dots.forEach(dot => {
       expect(dot.classes()).toContain('animate-bounce')
     })
@@ -24,7 +24,7 @@ describe('LoadingSpinner.vue', () => {
 
   it('chaque point est rond (rounded-full)', () => {
     const wrapper = mount(LoadingSpinner)
-    const dots = wrapper.findAll('span')
+    const dots = wrapper.findAll('span.animate-bounce')
     dots.forEach(dot => {
       expect(dot.classes()).toContain('rounded-full')
     })

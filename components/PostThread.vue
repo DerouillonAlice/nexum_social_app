@@ -25,6 +25,12 @@ const isMe = (authorIri) => {
   return authorId === myId
 }
 
+const getUserId = (authorIri) => {
+  if (!authorIri) return null
+  const iri = typeof authorIri === 'object' ? authorIri['@id'] : authorIri
+  return iri ? iri.toString().split('/').pop() : null
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -150,7 +156,7 @@ const deleteComment = async (comment) => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-white dark:bg-[#09090b] relative">
+  <div class="flex flex-col h-full bg-white dark:bg-[#09090b] relative" role="region" aria-label="Fil de commentaires">
     <!-- Main Post Content (Pinned at top) -->
     <div
       class="p-6 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
@@ -159,11 +165,14 @@ const deleteComment = async (comment) => {
           <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-xl" />
           <div>
             <h3 class="text-sm font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-              {{ getUserName(post.author) }}
+              <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" class="hover:underline transition-colors">
+                {{ getUserName(post.author) }}
+              </NuxtLink>
+              <span v-else>{{ getUserName(post.author) }}</span>
               <span v-if="isMe(post.author)"
                 class="px-1.5 py-0.5 rounded-md text-[10px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold uppercase tracking-wide">Vous</span>
             </h3>
-            <div class="flex items-center gap-2 text-[11px] font-medium text-gray-500 dark:text-zinc-500">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-gray-500 dark:text-zinc-400">
               <span>{{ formatDate(post.createdAt) }}</span>
               <span v-if="post.channel">
                 • <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`"
@@ -188,7 +197,7 @@ const deleteComment = async (comment) => {
     </div>
 
     <!-- Comments List -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-gray-50/50 dark:bg-zinc-950/50">
+    <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-gray-50/50 dark:bg-zinc-950/50" role="log" aria-label="Liste des commentaires">
       <LoadingSpinner v-if="isLoadingComments" />
 
       <div v-else-if="comments.length === 0" class="flex flex-col items-center justify-center py-10 text-center opacity-60">
@@ -209,10 +218,14 @@ const deleteComment = async (comment) => {
         <div class="flex flex-col max-w-[85%] min-w-[20%]"
           :class="[isMe(comment.author) ? 'items-end' : 'items-start']">
           <div class="flex items-center gap-2 mb-1 px-1">
-            <span class="text-[11px] font-bold text-gray-700 dark:text-zinc-300">
+            <NuxtLink v-if="!isMe(comment.author) && getUserId(comment.author)" :to="`/profile/${getUserId(comment.author)}`"
+              class="text-[11px] font-bold text-gray-700 dark:text-zinc-300 hover:underline transition-colors">
+              {{ getUserName(comment.author) }}
+            </NuxtLink>
+            <span v-else class="text-[11px] font-bold text-gray-700 dark:text-zinc-300">
               {{ isMe(comment.author) ? 'Vous' : getUserName(comment.author) }}
             </span>
-            <span class="text-[10px] text-gray-400 dark:text-zinc-600">
+            <span class="text-[10px] text-gray-500 dark:text-zinc-400">
               {{ comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString([], {
                 hour: '2-digit', minute:
               '2-digit' }) : '' }}
@@ -229,7 +242,8 @@ const deleteComment = async (comment) => {
 
             <!-- Bouton supprimer (visible au hover, uniquement pour l'auteur) -->
             <button v-if="isMe(comment.author)" @click="deleteComment(comment)"
-              class="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 shadow-sm"
+              class="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200 hover:bg-red-600 shadow-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
+              :aria-label="`Supprimer le commentaire : ${comment.body?.substring(0, 30)}`"
               title="Supprimer ce commentaire">
               <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -246,12 +260,14 @@ const deleteComment = async (comment) => {
         <div class="relative flex-1">
           <textarea v-model="newComment" rows="1"
             class="w-full bg-gray-100 dark:bg-zinc-900 border-0 rounded-2xl pl-4 pr-12 py-3.5 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/20 resize-none min-h-[48px] max-h-[120px]"
+            :aria-label="`Écrire un commentaire en réponse à ${getUserName(post.author)}`"
             :placeholder="`Répondre à ${getUserName(post.author).split(' ')[0]}...`" :disabled="isSendingComment"
             @input="(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }"
             @keydown.enter.exact.prevent="submitComment"></textarea>
 
           <button type="submit" :disabled="isSendingComment || !newComment.trim()"
-            class="absolute right-2 bottom-2 p-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl transition disabled:opacity-50 disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed">
+            aria-label="Envoyer le commentaire"
+            class="absolute right-2 bottom-2 p-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl transition disabled:opacity-50 disabled:bg-gray-200 dark:disabled:bg-zinc-800 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed focus:ring-2 focus:ring-zinc-500/50 focus:outline-none">
             <svg v-if="isSendingComment" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

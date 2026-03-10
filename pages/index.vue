@@ -2,14 +2,14 @@
 const authStore = useAuthStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
-const { fetchChannels, getChannel, isFavorite, favoriteChannels } = useChannels()
+const { fetchChannels, getChannel } = useChannels()
 const { deletePublication, editPublication } = useMessages()
 const { fetchReactions, toggleLike, hasLiked, getReactionCount } = useReactions()
 
 const posts = ref([])
 const selectedPost = ref(null)
 const initialLoading = ref(true)
-const showFavoritesOnly = ref(true)
+const sortBy = ref('recent')
 const openMenuId = ref(null)
 const commentCounts = ref({})
 const editingPostId = ref(null)
@@ -135,6 +135,12 @@ const isMe = (authorIri) => {
   return authorId === myId
 }
 
+const getUserId = (authorIri) => {
+  if (!authorIri) return null
+  const iri = typeof authorIri === 'object' ? authorIri['@id'] : authorIri
+  return iri ? iri.toString().split('/').pop() : null
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -172,25 +178,14 @@ const onCommentDeleted = () => {
   }
 }
 
-const getChannelId = (post) => {
-  if (!post.channel) return null
-  if (typeof post.channel === 'object') {
-    return post.channel.id || post.channel['@id']?.split('/').pop()
+const sortedPosts = computed(() => {
+  const sorted = [...posts.value]
+  if (sortBy.value === 'popular') {
+    sorted.sort((a, b) => (getReactionCount(b) || 0) - (getReactionCount(a) || 0))
+  } else {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   }
-  return String(post.channel).split('/').pop()
-}
-
-const filteredPosts = computed(() => {
-  if (!showFavoritesOnly.value || favoriteChannels.value.length === 0) {
-    return posts.value
-  }
-
-  const favoriteIds = new Set(favoriteChannels.value.map(c => String(c.id)))
-
-  return posts.value.filter(post => {
-    const channelId = getChannelId(post)
-    return channelId && favoriteIds.has(channelId)
-  })
+  return sorted
 })
 </script>
 
@@ -206,38 +201,50 @@ const filteredPosts = computed(() => {
 
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-zinc-200">Publications</h2>
-            <button v-if="!initialLoading" @click="showFavoritesOnly = !showFavoritesOnly"
-              class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
-              :class="showFavoritesOnly ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
-              {{ showFavoritesOnly ? '★ Favoris' : '☆ Tout' }}
-            </button>
+            <div v-if="!initialLoading" class="flex items-center gap-1.5">
+              <button @click="sortBy = 'recent'"
+                class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
+                :class="sortBy === 'recent' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
+                Récent
+              </button>
+              <button @click="sortBy = 'popular'"
+                class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
+                :class="sortBy === 'popular' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
+                Populaire
+              </button>
+            </div>
           </div>
 
           <LoadingSpinner v-if="initialLoading" />
 
-          <div v-else-if="filteredPosts.length === 0"
-            class="text-center py-12 text-gray-400 dark:text-zinc-600">
-            <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications ici.</p>
-            <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
-            <p v-else>Aucune publication.</p>
+          <div v-else-if="sortedPosts.length === 0"
+            class="text-center py-12 text-gray-500 dark:text-zinc-400">
+            <p>Aucune publication.</p>
           </div>
 
-          <article v-for="post in filteredPosts" :key="post.id"
+          <article v-for="post in sortedPosts" :key="post.id"
             class="group bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200/60 dark:border-zinc-800/60 hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200 relative"
-            :class="selectedPost?.id === post.id ? 'ring-2 ring-zinc-400/40 dark:ring-zinc-500/40' : ''">
+            :class="selectedPost?.id === post.id ? 'ring-2 ring-zinc-400/40 dark:ring-zinc-500/40' : ''"
+            :aria-label="`Publication de ${getUserName(post.author)}`">
 
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-3">
-                <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-full" />
+                <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" @click.stop>
+                  <UserAvatar :user="post.author" sizeClass="h-10 w-10 rounded-full" class="hover:ring-2 hover:ring-zinc-400/50 transition-all" />
+                </NuxtLink>
+                <UserAvatar v-else :user="post.author" sizeClass="h-10 w-10 rounded-full" />
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-                    {{ getUserName(post.author) }}
+                    <NuxtLink v-if="getUserId(post.author)" :to="`/profile/${getUserId(post.author)}`" class="hover:underline transition-colors" @click.stop>
+                      {{ getUserName(post.author) }}
+                    </NuxtLink>
+                    <span v-else>{{ getUserName(post.author) }}</span>
                     <span v-if="isMe(post.author)" class="px-1.5 py-0.5 rounded-md text-[10px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold uppercase tracking-wide">Vous</span>
                   </h3>
-                  <div class="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-zinc-500">
+                  <div class="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-zinc-400">
                     <span>{{ formatDate(post.createdAt) }}</span>
                     <span v-if="post.channel" class="flex items-center gap-1">
-                      <span class="text-gray-300 dark:text-zinc-700">·</span>
+                      <span class="text-gray-400 dark:text-zinc-500">·</span>
                       <NuxtLink v-if="getChannel(post.channel)" :to="`/channels/${getChannel(post.channel).slug}`"
                         class="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors" @click.stop>
                         #{{ getChannel(post.channel).name }}
@@ -249,23 +256,29 @@ const filteredPosts = computed(() => {
 
               <div v-if="isMe(post.author)" class="relative">
                 <button @click.stop="openMenuId = openMenuId === post.id ? null : post.id"
-                  class="p-1.5 text-gray-400 hover:text-gray-600 dark:text-zinc-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                  :aria-expanded="openMenuId === post.id"
+                  aria-haspopup="true"
+                  aria-label="Actions sur la publication"
+                  class="p-1.5 text-gray-500 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors focus:ring-2 focus:ring-zinc-500/50 focus:outline-none">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
                 </button>
                 <div v-if="openMenuId === post.id"
-                  class="absolute right-0 top-10 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-lg z-20 min-w-[140px] p-1">
+                  class="absolute right-0 top-10 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-lg z-20 min-w-[140px] p-1"
+                  role="menu" aria-label="Menu de la publication">
                   <button @click.stop="startEditing(post)"
+                    role="menuitem"
                     class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-lg transition font-medium">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Modifier
                   </button>
                   <button @click.stop="handleDeletePost(post)"
+                    role="menuitem"
                     class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition font-medium">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                     Supprimer
@@ -302,7 +315,8 @@ const filteredPosts = computed(() => {
             <!-- Actions -->
             <div class="flex items-center gap-4 pt-3 border-t border-gray-100 dark:border-zinc-800/60">
               <button @click.stop="selectedPost = post"
-                class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
+                aria-label="Voir les commentaires"
+                class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -310,8 +324,10 @@ const filteredPosts = computed(() => {
               </button>
 
               <button @click.stop="toggleLike(post)"
+                :aria-label="hasLiked(post) ? 'Retirer le j\'aime' : 'Aimer cette publication'"
+                :aria-pressed="hasLiked(post)"
                 class="flex items-center gap-1.5 text-xs font-medium transition-colors"
-                :class="hasLiked(post) ? 'text-pink-500' : 'text-gray-500 dark:text-zinc-500 hover:text-pink-500'">
+                :class="hasLiked(post) ? 'text-pink-500' : 'text-gray-500 dark:text-zinc-400 hover:text-pink-500'">
                 <svg class="h-4 w-4" :class="hasLiked(post) ? 'fill-current' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -327,12 +343,14 @@ const filteredPosts = computed(() => {
         enter-to-class="max-w-[26rem]" leave-active-class="transition-all duration-300 ease-in"
         leave-from-class="max-w-[26rem]" leave-to-class="max-w-0">
         <aside v-if="selectedPost"
-          class="hidden xl:flex flex-col w-[26rem] overflow-hidden border-l border-gray-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 flex-shrink-0">
+          class="hidden xl:flex flex-col w-[26rem] overflow-hidden border-l border-gray-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 flex-shrink-0"
+          aria-label="Panneau de commentaires">
           <div class="border-b border-gray-200/60 dark:border-zinc-800/60 p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-zinc-900">
             <h3 class="font-semibold text-sm text-gray-800 dark:text-zinc-200">Commentaires</h3>
             <button @click="selectedPost = null"
-              class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              aria-label="Fermer les commentaires"
+              class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition text-gray-500 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-300">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -346,12 +364,13 @@ const filteredPosts = computed(() => {
       <!-- Mobile comments modal -->
       <div v-if="selectedPost"
         class="xl:hidden fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm"
+        role="dialog" aria-modal="true" aria-label="Commentaires"
         @click="selectedPost = null">
         <div class="bg-white dark:bg-zinc-900 w-full sm:max-w-2xl sm:rounded-2xl max-h-[80vh] overflow-y-auto" @click.stop>
           <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-gray-200/60 dark:border-zinc-800/60 p-4 flex justify-between items-center">
             <h3 class="font-semibold text-sm">Commentaires</h3>
-            <button @click="selectedPost = null" class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <button @click="selectedPost = null" aria-label="Fermer les commentaires" class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -380,7 +399,7 @@ const filteredPosts = computed(() => {
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-zinc-100 tracking-tight leading-tight mb-6">
               Communiquez <br class="hidden sm:block">simplement.
             </h1>
-            <p class="text-lg text-gray-500 dark:text-zinc-500 max-w-xl mx-auto mb-10 leading-relaxed">
+            <p class="text-lg text-gray-500 dark:text-zinc-400 max-w-xl mx-auto mb-10 leading-relaxed">
               Nexum réunit vos équipes dans un espace de discussion intuitif. Salons, publications, commentaires — tout ce dont vous avez besoin, sans superflu.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -399,7 +418,7 @@ const filteredPosts = computed(() => {
           <div class="max-w-5xl mx-auto">
             <div class="text-center mb-16">
               <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4">Tout est pensé pour la simplicité</h2>
-              <p class="text-gray-500 dark:text-zinc-500 max-w-lg mx-auto">Des outils essentiels, une interface épurée. Rien de trop.</p>
+              <p class="text-gray-500 dark:text-zinc-400 max-w-lg mx-auto">Des outils essentiels, une interface épurée. Rien de trop.</p>
             </div>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -411,7 +430,7 @@ const filteredPosts = computed(() => {
                   </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Salons de discussion</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Créez des salons thématiques pour organiser vos conversations par projet, équipe ou sujet.</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Créez des salons thématiques pour organiser vos conversations par projet, équipe ou sujet.</p>
               </div>
 
               <!-- Feature 2 -->
@@ -422,18 +441,18 @@ const filteredPosts = computed(() => {
                   </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Publications & médias</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Partagez du texte et des images. Vos publications sont visibles par tous les membres du salon.</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Partagez du texte et des images. Vos publications sont visibles par tous les membres du salon.</p>
               </div>
 
               <!-- Feature 3 -->
               <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
                 <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center mb-4">
                   <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                   </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Favoris & flux personnalisé</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Suivez vos salons préférés et retrouvez un fil d'actualité filtré selon vos centres d'intérêt.</p>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Tri & flux personnalisé</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Triez les publications par date ou par popularité pour retrouver rapidement ce qui vous intéresse.</p>
               </div>
 
               <!-- Feature 4 -->
@@ -444,7 +463,7 @@ const filteredPosts = computed(() => {
                   </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Réactions & commentaires</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Réagissez aux publications, commentez et engagez la conversation avec votre communauté.</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Réagissez aux publications, commentez et engagez la conversation avec votre communauté.</p>
               </div>
 
               <!-- Feature 5 -->
@@ -455,7 +474,7 @@ const filteredPosts = computed(() => {
                   </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Recherche globale</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Retrouvez n'importe quel utilisateur, salon ou publication en un instant grâce à la recherche intégrée.</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Retrouvez n'importe quel utilisateur, salon ou publication en un instant grâce à la recherche intégrée.</p>
               </div>
 
               <!-- Feature 6 -->
@@ -466,7 +485,7 @@ const filteredPosts = computed(() => {
                   </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Mode sombre</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">Interface adaptée à vos préférences avec un thème clair et sombre, pour un confort visuel optimal.</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Interface adaptée à vos préférences avec un thème clair et sombre, pour un confort visuel optimal.</p>
               </div>
             </div>
           </div>
@@ -476,7 +495,7 @@ const filteredPosts = computed(() => {
         <section class="px-6 py-20 border-t border-gray-100 dark:border-zinc-900">
           <div class="max-w-2xl mx-auto text-center">
             <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-4">Prêt à rejoindre la conversation ?</h2>
-            <p class="text-gray-500 dark:text-zinc-500 mb-8">Créez votre compte en quelques secondes et commencez à échanger avec votre communauté.</p>
+            <p class="text-gray-500 dark:text-zinc-400 mb-8">Créez votre compte en quelques secondes et commencez à échanger avec votre communauté.</p>
             <NuxtLink to="/register" class="inline-flex px-8 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-sm transition-all hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-95">
               Commencer gratuitement
             </NuxtLink>
@@ -485,7 +504,7 @@ const filteredPosts = computed(() => {
 
         <!-- Footer -->
         <footer class="px-6 py-8 border-t border-gray-100 dark:border-zinc-900 text-center">
-          <p class="text-xs text-gray-400 dark:text-zinc-600">Nexum — Projet universitaire IUT · {{ new Date().getFullYear() }}</p>
+          <p class="text-xs text-gray-500 dark:text-zinc-400">Nexum — Projet universitaire IUT · {{ new Date().getFullYear() }}</p>
         </footer>
       </div>
     </template>

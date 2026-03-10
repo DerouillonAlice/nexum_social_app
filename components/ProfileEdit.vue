@@ -24,8 +24,23 @@ const currentAvatar = computed(() => {
   const avatar = authStore.user?.avatar
   if (!avatar) return null
 
-  if (typeof avatar === 'object' && avatar.contentUrl) {
-    return avatar.contentUrl
+  // If it's a media object with an id, use the media-proxy
+  if (typeof avatar === 'object') {
+    if (avatar.contentUrl) return avatar.contentUrl
+    const mediaId = avatar.id || avatar['@id']?.split('/').pop()
+    if (mediaId) {
+      const token = authStore.token || ''
+      return `/api/media-proxy/${mediaId}?token=${encodeURIComponent(token)}`
+    }
+  }
+
+  // If it's a string IRI like /api/media/123, extract id and proxy
+  if (typeof avatar === 'string') {
+    const mediaId = avatar.split('/').pop()
+    if (mediaId) {
+      const token = authStore.token || ''
+      return `/api/media-proxy/${mediaId}?token=${encodeURIComponent(token)}`
+    }
   }
 
   return null

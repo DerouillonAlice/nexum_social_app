@@ -5,7 +5,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { request } = useAPI()
-const { isFavorite, toggleFavorite, isChannelOwner, deleteChannel } = useChannels()
+const { isChannelOwner, deleteChannel } = useChannels()
 
 const { data: channels, pending, error, refresh } = await useAsyncData('channels', () =>
   request('/channels'), {
@@ -33,6 +33,21 @@ const newChannel = ref({ name: '', description: '' })
 const searchQuery = ref('')
 const channelToDelete = ref(null)
 const isDeleting = ref(false)
+
+const route = useRoute()
+
+// Auto-open create modal if navigated with #create
+onMounted(() => {
+  if (route.hash === '#create') {
+    showModal.value = true
+  }
+})
+
+watch(() => route.hash, (hash) => {
+  if (hash === '#create') {
+    showModal.value = true
+  }
+})
 
 const filteredChannels = computed(() => {
   if (!channels.value) return []
@@ -153,55 +168,16 @@ const handleDeleteChannel = async () => {
           </div>
 
           <template v-else>
-            <!-- Favorites section -->
-            <div v-if="filteredChannels.some(c => isFavorite(c.id))">
-              <div class="px-6 pt-4 pb-2">
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Favoris</h3>
-              </div>
-              <div class="space-y-px">
-                <NuxtLink v-for="channel in filteredChannels.filter(c => isFavorite(c.id))" :key="'fav-' + channel.id"
-                  :to="`/channels/${channel.slug}`"
-                  class="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors group">
-                  <div class="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-sm font-bold shrink-0">
-                    {{ channel.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate">
-                        <span class="text-gray-400 dark:text-zinc-500 font-normal">#</span> {{ channel.name }}
-                      </span>
-                      <svg class="w-3.5 h-3.5 text-amber-400 shrink-0 fill-current" viewBox="0 0 24 24">
-                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                      </svg>
-                    </div>
-                    <p class="text-xs text-gray-400 dark:text-zinc-600 truncate mt-0.5">
-                      {{ channel.description || 'Aucune description' }}
-                    </p>
-                  </div>
-                  <button @click.prevent.stop="toggleFavorite(channel)"
-                    class="p-1.5 text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition opacity-0 group-hover:opacity-100"
-                    title="Retirer des favoris">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <svg class="w-4 h-4 text-gray-300 dark:text-zinc-700 shrink-0 group-hover:text-gray-400 dark:group-hover:text-zinc-500 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </NuxtLink>
-              </div>
-            </div>
-
             <!-- All channels -->
             <div>
               <div class="px-6 pt-4 pb-2">
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
                   {{ searchQuery.trim() ? 'Résultats' : 'Tous les salons' }}
                 </h3>
               </div>
 
               <div v-if="filteredChannels.length === 0" class="px-6 py-8 text-center">
-                <p class="text-sm text-gray-400 dark:text-zinc-600">Aucun salon trouvé pour « {{ searchQuery }} »</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400">Aucun salon trouvé pour « {{ searchQuery }} »</p>
               </div>
 
               <div v-else class="space-y-px">
@@ -217,29 +193,19 @@ const handleDeleteChannel = async () => {
                           <span class="text-gray-400 dark:text-zinc-500 font-normal">#</span> {{ channel.name }}
                         </span>
                       </div>
-                      <p class="text-xs text-gray-400 dark:text-zinc-600 truncate mt-0.5">
+                      <p class="text-xs text-gray-500 dark:text-zinc-400 truncate mt-0.5">
                         {{ channel.description || 'Aucune description' }}
                       </p>
                     </div>
                   </NuxtLink>
 
-                  <span class="text-[11px] text-gray-400 dark:text-zinc-600 shrink-0 hidden sm:block">{{ formatDate(channel.createdAt) }}</span>
+                  <span class="text-[11px] text-gray-500 dark:text-zinc-400 shrink-0 hidden sm:block">{{ formatDate(channel.createdAt) }}</span>
 
                   <button v-if="isChannelOwner(channel)" @click.stop="channelToDelete = channel"
                     class="p-1.5 rounded-lg transition shrink-0 text-gray-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                     title="Supprimer ce salon">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-
-                  <button @click.stop="toggleFavorite(channel)"
-                    class="p-1.5 rounded-lg transition shrink-0"
-                    :class="isFavorite(channel.id) ? 'text-amber-400' : 'text-gray-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-amber-400'"
-                    :title="isFavorite(channel.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'">
-                    <svg class="w-4 h-4" :fill="isFavorite(channel.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                     </svg>
                   </button>
 
