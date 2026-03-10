@@ -5,7 +5,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { request } = useAPI()
-const { isFavorite, toggleFavorite } = useChannels()
+const { isFavorite, toggleFavorite, isChannelOwner, deleteChannel } = useChannels()
 
 const { data: channels, pending, error, refresh } = await useAsyncData('channels', () =>
   request('/channels'), {
@@ -31,6 +31,8 @@ const isCreating = ref(false)
 const errorMessage = ref('')
 const newChannel = ref({ name: '', description: '' })
 const searchQuery = ref('')
+const channelToDelete = ref(null)
+const isDeleting = ref(false)
 
 const filteredChannels = computed(() => {
   if (!channels.value) return []
@@ -70,6 +72,20 @@ const createChannel = async () => {
     errorMessage.value = "Une erreur est survenue lors de la création."
   } finally {
     isCreating.value = false
+  }
+}
+
+const handleDeleteChannel = async () => {
+  if (!channelToDelete.value) return
+  isDeleting.value = true
+  try {
+    await deleteChannel(channelToDelete.value)
+    channelToDelete.value = null
+    refresh()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>
@@ -209,6 +225,14 @@ const createChannel = async () => {
 
                   <span class="text-[11px] text-gray-400 dark:text-zinc-600 shrink-0 hidden sm:block">{{ formatDate(channel.createdAt) }}</span>
 
+                  <button v-if="isChannelOwner(channel)" @click.stop="channelToDelete = channel"
+                    class="p-1.5 rounded-lg transition shrink-0 text-gray-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    title="Supprimer ce salon">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+
                   <button @click.stop="toggleFavorite(channel)"
                     class="p-1.5 rounded-lg transition shrink-0"
                     :class="isFavorite(channel.id) ? 'text-amber-400' : 'text-gray-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-amber-400'"
@@ -286,6 +310,38 @@ const createChannel = async () => {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Delete Channel Confirmation Modal -->
+    <div v-if="channelToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click.self="channelToDelete = null">
+      <div class="bg-white dark:bg-zinc-900 border border-gray-200/60 dark:border-zinc-800 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-zinc-100">Supprimer ce salon ?</h3>
+            <p class="text-sm text-gray-500 dark:text-zinc-500 mt-1">
+              Le salon <strong class="text-gray-700 dark:text-zinc-300">#{{ channelToDelete.name }}</strong> et tous ses messages seront supprimés définitivement.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button @click="channelToDelete = null"
+            class="px-4 py-2 text-sm text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition">
+            Annuler
+          </button>
+          <button @click="handleDeleteChannel" :disabled="isDeleting"
+            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm transition flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+            <span v-if="isDeleting" class="animate-spin h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full"></span>
+            Supprimer
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -8,7 +8,7 @@ const authStore = useAuthStore()
 const { request } = useAPI()
 const { messages, isLoading, isSending, fetchMessages, sendMessage } = useMessages()
 const { fetchUsers, getUserName, getUser } = useUsers()
-const { isFavorite, toggleFavorite } = useChannels()
+const { isFavorite, toggleFavorite, isChannelOwner, deleteChannel } = useChannels()
 
 const { data: channel, error: channelError } = await useAsyncData(`channel-${channelSlug}`, () =>
   request(`/channels/${channelSlug}`)
@@ -21,6 +21,8 @@ const selectedFile = ref(null)
 const filePreview = ref(null)
 const fileInput = ref(null)
 const showChannelInfo = ref(false)
+const showDeleteConfirm = ref(false)
+const isDeletingChannel = ref(false)
 
 onMounted(async () => {
   await fetchUsers()
@@ -117,6 +119,19 @@ const shouldGroupWithPrevious = (index) => {
 }
 
 watch(messages, () => scrollToBottom())
+
+const handleDeleteChannel = async () => {
+  if (!channel.value) return
+  isDeletingChannel.value = true
+  try {
+    await deleteChannel(channel.value)
+    navigateTo('/channels')
+  } catch (e) {
+    console.error(e)
+    isDeletingChannel.value = false
+    showDeleteConfirm.value = false
+  }
+}
 </script>
 
 <template>
@@ -190,7 +205,7 @@ watch(messages, () => scrollToBottom())
               <div class="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-sm font-bold text-zinc-600 dark:text-zinc-400 shrink-0">
                 {{ channel?.name?.charAt(0)?.toUpperCase() }}
               </div>
-              <div class="min-w-0">
+              <div class="min-w-0 flex-1">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100"># {{ channel?.name }}</h3>
                 <p class="text-xs text-gray-500 dark:text-zinc-500 mt-0.5">
                   {{ channel?.description || 'Aucune description' }}
@@ -199,6 +214,13 @@ watch(messages, () => scrollToBottom())
                   {{ messages.length }} message{{ messages.length !== 1 ? 's' : '' }}
                 </p>
               </div>
+              <button v-if="isChannelOwner(channel)" @click="showDeleteConfirm = true"
+                class="p-1.5 text-gray-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition shrink-0 self-start"
+                title="Supprimer ce salon">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
           </div>
         </Transition>
@@ -329,6 +351,38 @@ watch(messages, () => scrollToBottom())
           </p>
         </footer>
       </template>
+    </div>
+
+    <!-- Delete Channel Confirmation Modal -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click.self="showDeleteConfirm = false">
+      <div class="bg-white dark:bg-zinc-900 border border-gray-200/60 dark:border-zinc-800 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-zinc-100">Supprimer ce salon ?</h3>
+            <p class="text-sm text-gray-500 dark:text-zinc-500 mt-1">
+              Le salon <strong class="text-gray-700 dark:text-zinc-300">#{{ channel?.name }}</strong> et tous ses messages seront supprimés définitivement.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button @click="showDeleteConfirm = false"
+            class="px-4 py-2 text-sm text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white font-medium hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition">
+            Annuler
+          </button>
+          <button @click="handleDeleteChannel" :disabled="isDeletingChannel"
+            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm transition flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+            <span v-if="isDeletingChannel" class="animate-spin h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full"></span>
+            Supprimer
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
