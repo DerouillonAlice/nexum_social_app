@@ -165,6 +165,13 @@ const onCommentAdded = () => {
   }
 }
 
+const onCommentDeleted = () => {
+  if (selectedPost.value?.id) {
+    const current = commentCounts.value[selectedPost.value.id] || 0
+    commentCounts.value[selectedPost.value.id] = Math.max(0, current - 1)
+  }
+}
+
 const getChannelId = (post) => {
   if (!post.channel) return null
   if (typeof post.channel === 'object') {
@@ -331,7 +338,7 @@ const filteredPosts = computed(() => {
             </button>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+            <PostThread :post="selectedPost" @comment-added="onCommentAdded" @comment-deleted="onCommentDeleted" />
           </div>
         </aside>
       </Transition>
@@ -349,7 +356,7 @@ const filteredPosts = computed(() => {
               </svg>
             </button>
           </div>
-          <PostThread :post="selectedPost" @comment-added="onCommentAdded" />
+          <PostThread :post="selectedPost" @comment-added="onCommentAdded" @comment-deleted="onCommentDeleted" />
         </div>
       </div>
 

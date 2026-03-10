@@ -19,8 +19,8 @@ export const useAPI = () => {
 
     return await $fetch(url, {
       baseURL,
-      headers,
       ...options,
+      headers,
       async onResponseError({ response }) {
         if (response.status === 401) {
           const route = useRoute()

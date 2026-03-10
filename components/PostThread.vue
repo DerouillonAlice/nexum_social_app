@@ -6,7 +6,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['comment-added'])
+const emit = defineEmits(['comment-added', 'comment-deleted'])
 
 const authStore = useAuthStore()
 const { request } = useAPI()
@@ -142,6 +142,7 @@ const deleteComment = async (comment) => {
       const cId = c.id || c['@id']?.split('/').pop()
       return cId !== commentId
     })
+    emit('comment-deleted')
   } catch (e) {
     console.error('Error deleting comment', e)
   }
