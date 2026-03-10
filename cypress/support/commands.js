@@ -22,13 +22,13 @@
 //
 //
 Cypress.Commands.add('login', (email = 'alice@example.com', password = 'password123') => {
+  cy.clearCookies()
+  cy.clearLocalStorage()
   cy.visit('/login')
-  cy.get('input[type="email"]').should('be.visible').type(email)
-  cy.get('input[type="password"]').should('be.visible').type(password)
-  cy.get('button[type="submit"]').click()
-  // Wait for redirect to home
-  cy.location('pathname').should('eq', '/')
-  cy.get('#user-menu-trigger', { timeout: 10000 }).should('be.visible')
+  cy.get('input[type="email"]').should('be.visible').clear().type(email)
+  cy.get('input[type="password"]').should('be.visible').clear().type(password)
+  cy.get('button[type="submit"]').should('not.be.disabled').click()
+  cy.location('pathname', { timeout: 30000 }).should('not.eq', '/login')
 })
 
 

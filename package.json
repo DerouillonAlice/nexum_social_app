@@ -8,6 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:run": "vitest run",
     "cypress:open": "cypress open",
     "test:e2e": "cypress run --browser chrome"
   },
@@ -22,6 +24,10 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "cypress": "^15.10.0"
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/test-utils": "^2.4.6",
+    "cypress": "^15.10.0",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
   }
 }

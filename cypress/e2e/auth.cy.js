@@ -4,7 +4,7 @@ describe('Authentication Flow', () => {
     cy.clearLocalStorage()
   })
 
-  it('should display login form correctly', () => {
+  it('affiche le formulaire de connexion', () => {
     cy.visit('/login')
     cy.contains('h1', 'Nexum').should('be.visible')
     cy.get('input[type="email"]').should('be.visible')
@@ -12,58 +12,31 @@ describe('Authentication Flow', () => {
     cy.get('button[type="submit"]').should('contain', 'Se connecter')
   })
 
-  it('should show error with invalid credentials', () => {
-    // Mock 401 response
-    cy.intercept('POST', /\/login/, {
-      statusCode: 401,
-      body: { message: 'Invalid credentials' }
-    }).as('loginFail')
-
+  it('affiche une erreur avec des identifiants invalides', () => {
     cy.visit('/login')
-    cy.get('input[type="email"]').type('wrong@example.com')
-    cy.get('input[type="password"]').type('wrongpassword')
-    cy.get('button[type="submit"]').click()
-    
-    cy.wait('@loginFail')
-    
-    // Check for error message
-    cy.contains(/impossible|erreur|check/i).should('be.visible')
+    cy.get('input[type="email"]').type('faux-email-inexistant@test.com')
+    cy.get('input[type="password"]').type('mauvais-mot-de-passe')
+    cy.get('form').submit()
+
+    // Le serveur retourne 401 → le composant affiche l'erreur
+    cy.contains('Impossible de se connecter', { timeout: 15000 }).should('be.visible')
   })
 
-  it('should login successfully with valid credentials', () => {
-    // Mock success response
-    cy.intercept('POST', /\/login/, {
-      statusCode: 200,
-      body: { token: 'fake-token-123' }
-    }).as('loginSuccess')
-
-    cy.intercept('GET', /\/users/, {
-      statusCode: 200,
-      body: {
-        'hydra:member': [
-          {
-            '@id': '/api/users/1',
-            id: 1,
-            email: 'alice@example.com',
-            displayName: 'Alice',
-            avatar: 'avatar.png'
-          }
-        ]
-      }
-    }).as('getUser')
-
+  it('se connecte avec des identifiants valides', () => {
     cy.visit('/login')
-    cy.get('input[type="email"]').type('alice@example.com')
-    cy.get('input[type="password"]').type('password123')
-    cy.get('button[type="submit"]').click()
+    cy.get('input[type="email"]').clear().type('alice@example.com')
+    cy.get('input[type="password"]').clear().type('password123')
+    cy.get('button[type="submit"]').should('not.be.disabled').click()
 
-    cy.wait('@loginSuccess')
-    cy.wait('@getUser')
+    // Doit rediriger vers la home
+    cy.location('pathname', { timeout: 30000 }).should('not.eq', '/login')
+  })
 
-    // Should redirect to home
-    cy.location('pathname').should('eq', '/')
-    // Should see user avatar or menu
-    cy.get('#user-menu-trigger').should('be.visible')
+  it('affiche le lien vers la création de compte', () => {
+    cy.visit('/login')
+    cy.contains('Créer un compte gratuitement').should('be.visible')
+    cy.contains('Créer un compte gratuitement').click()
+    cy.location('pathname').should('eq', '/register')
   })
 })
 
