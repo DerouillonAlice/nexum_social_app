@@ -100,6 +100,23 @@ export const useMessages = () => {
     }
   }
 
+  const editPublication = async (publication, newBody) => {
+    const pubId = publication.id || publication['@id']?.split('/').pop()
+    if (!pubId) return false
+
+    try {
+      const updated = await request(`/publications/${pubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/merge-patch+json' },
+        body: { body: newBody }
+      })
+      return updated
+    } catch (e) {
+      console.error('Error editing publication', e)
+      return false
+    }
+  }
+
   const deletePublication = async (publication) => {
     const pubId = publication.id || publication['@id']?.split('/').pop()
     if (!pubId) return false
@@ -121,6 +138,7 @@ export const useMessages = () => {
     isSending,
     fetchMessages,
     sendMessage,
+    editPublication,
     deletePublication
   }
 }
