@@ -17,8 +17,15 @@ const handleToggle = () => {
   <header role="banner" class="h-14 flex items-center justify-between pl-14 md:pl-4 pr-4 sm:px-6 bg-white dark:bg-[#0a0a0c] border-b border-gray-200/60 dark:border-zinc-800/60 flex-shrink-0 z-30 sticky top-0">
 
     <nav aria-label="Navigation principale" class="flex items-center gap-4 sm:gap-8 w-full justify-between">
+      <!-- Mobile home button -->
+      <NuxtLink to="/" class="md:hidden p-1.5 rounded-lg text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shrink-0" aria-label="Accueil">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </NuxtLink>
+
       <!-- Logo -->
-      <NuxtLink to="/" class="flex items-center gap-2.5 group shrink-0" aria-label="Accueil Nexum">
+      <NuxtLink to="/" class="flex items-center gap-2.5 group shrink-0 hidden md:flex" aria-label="Accueil Nexum">
         <img src="~/assets/img/logo.png" alt="Logo Nexum" class="h-7 w-auto transition-transform duration-300 group-hover:scale-105">
         <span class="text-lg font-bold tracking-tight hidden sm:inline text-gray-900 dark:text-zinc-100">NEXUM</span>
       </NuxtLink>

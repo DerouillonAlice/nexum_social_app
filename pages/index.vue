@@ -2,14 +2,14 @@
 const authStore = useAuthStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
-const { fetchChannels, getChannel, isFavorite, favoriteChannels } = useChannels()
+const { fetchChannels, getChannel } = useChannels()
 const { deletePublication, editPublication } = useMessages()
 const { fetchReactions, toggleLike, hasLiked, getReactionCount } = useReactions()
 
 const posts = ref([])
 const selectedPost = ref(null)
 const initialLoading = ref(true)
-const showFavoritesOnly = ref(true)
+const sortBy = ref('recent')
 const openMenuId = ref(null)
 const commentCounts = ref({})
 const editingPostId = ref(null)
@@ -178,25 +178,14 @@ const onCommentDeleted = () => {
   }
 }
 
-const getChannelId = (post) => {
-  if (!post.channel) return null
-  if (typeof post.channel === 'object') {
-    return post.channel.id || post.channel['@id']?.split('/').pop()
+const sortedPosts = computed(() => {
+  const sorted = [...posts.value]
+  if (sortBy.value === 'popular') {
+    sorted.sort((a, b) => (getReactionCount(b) || 0) - (getReactionCount(a) || 0))
+  } else {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   }
-  return String(post.channel).split('/').pop()
-}
-
-const filteredPosts = computed(() => {
-  if (!showFavoritesOnly.value || favoriteChannels.value.length === 0) {
-    return posts.value
-  }
-
-  const favoriteIds = new Set(favoriteChannels.value.map(c => String(c.id)))
-
-  return posts.value.filter(post => {
-    const channelId = getChannelId(post)
-    return channelId && favoriteIds.has(channelId)
-  })
+  return sorted
 })
 </script>
 
@@ -212,23 +201,28 @@ const filteredPosts = computed(() => {
 
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-zinc-200">Publications</h2>
-            <button v-if="!initialLoading" @click="showFavoritesOnly = !showFavoritesOnly"
-              class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
-              :class="showFavoritesOnly ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
-              {{ showFavoritesOnly ? '★ Favoris' : '☆ Tout' }}
-            </button>
+            <div v-if="!initialLoading" class="flex items-center gap-1.5">
+              <button @click="sortBy = 'recent'"
+                class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
+                :class="sortBy === 'recent' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
+                Récent
+              </button>
+              <button @click="sortBy = 'popular'"
+                class="text-xs px-3 py-1.5 rounded-lg transition-all font-medium border"
+                :class="sortBy === 'popular' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-700'">
+                Populaire
+              </button>
+            </div>
           </div>
 
           <LoadingSpinner v-if="initialLoading" />
 
-          <div v-else-if="filteredPosts.length === 0"
+          <div v-else-if="sortedPosts.length === 0"
             class="text-center py-12 text-gray-500 dark:text-zinc-400">
-            <p v-if="showFavoritesOnly && favoriteChannels.length === 0">Suivez des espaces pour voir leurs publications ici.</p>
-            <p v-else-if="showFavoritesOnly">Aucune publication dans vos espaces favoris.</p>
-            <p v-else>Aucune publication.</p>
+            <p>Aucune publication.</p>
           </div>
 
-          <article v-for="post in filteredPosts" :key="post.id"
+          <article v-for="post in sortedPosts" :key="post.id"
             class="group bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200/60 dark:border-zinc-800/60 hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200 relative"
             :class="selectedPost?.id === post.id ? 'ring-2 ring-zinc-400/40 dark:ring-zinc-500/40' : ''"
             :aria-label="`Publication de ${getUserName(post.author)}`">
@@ -454,11 +448,11 @@ const filteredPosts = computed(() => {
               <div class="p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
                 <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center mb-4">
                   <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                   </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Favoris & flux personnalisé</h3>
-                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Suivez vos salons préférés et retrouvez un fil d'actualité filtré selon vos centres d'intérêt.</p>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">Tri & flux personnalisé</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">Triez les publications par date ou par popularité pour retrouver rapidement ce qui vous intéresse.</p>
               </div>
 
               <!-- Feature 4 -->
