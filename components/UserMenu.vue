@@ -49,6 +49,10 @@ onMounted(() => {
             class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 py-1 overflow-hidden"
             role="menu"
             aria-label="Options du compte">
+            <NuxtLink to="/profile"
+                class="block px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                role="menuitem"
+                @click="isMenuOpen = false">Mon profil</NuxtLink>
             <NuxtLink to="/settings"
                 class="block px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                 role="menuitem"
