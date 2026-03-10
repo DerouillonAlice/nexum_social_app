@@ -131,6 +131,21 @@ watch(() => props.post, () => {
   isLoadingComments.value = true
   fetchComments()
 }, { immediate: true })
+
+const deleteComment = async (comment) => {
+  const commentId = comment.id || comment['@id']?.split('/').pop()
+  if (!commentId) return
+
+  try {
+    await request(`/comments/${commentId}`, { method: 'DELETE' })
+    comments.value = comments.value.filter(c => {
+      const cId = c.id || c['@id']?.split('/').pop()
+      return cId !== commentId
+    })
+  } catch (e) {
+    console.error('Error deleting comment', e)
+  }
+}
 </script>
 
 <template>
@@ -210,6 +225,15 @@ watch(() => props.post, () => {
                 : 'bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 text-gray-800 dark:text-zinc-300 rounded-2xl rounded-tl-sm'
             ]">
             {{ comment.body }}
+
+            <!-- Bouton supprimer (visible au hover, uniquement pour l'auteur) -->
+            <button v-if="isMe(comment.author)" @click="deleteComment(comment)"
+              class="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 shadow-sm"
+              title="Supprimer ce commentaire">
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

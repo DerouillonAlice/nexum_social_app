@@ -3,7 +3,7 @@ const authStore = useAuthStore()
 const { request } = useAPI()
 const { fetchUsers, getUserName } = useUsers()
 const { fetchChannels, getChannel, isFavorite, favoriteChannels } = useChannels()
-const { deletePublication } = useMessages()
+const { deletePublication, editPublication } = useMessages()
 const { fetchReactions, toggleLike, hasLiked, getReactionCount } = useReactions()
 
 const posts = ref([])
@@ -12,6 +12,8 @@ const initialLoading = ref(true)
 const showFavoritesOnly = ref(true)
 const openMenuId = ref(null)
 const commentCounts = ref({})
+const editingPostId = ref(null)
+const editingBody = ref('')
 
 const handleDeletePost = async (post) => {
   if (!confirm('Supprimer cette publication ?')) return
@@ -23,6 +25,30 @@ const handleDeletePost = async (post) => {
     }
   }
   openMenuId.value = null
+}
+
+const startEditing = (post) => {
+  editingPostId.value = post.id
+  editingBody.value = post.body || ''
+  openMenuId.value = null
+}
+
+const cancelEditing = () => {
+  editingPostId.value = null
+  editingBody.value = ''
+}
+
+const saveEditing = async (post) => {
+  if (!editingBody.value.trim()) return
+  const updated = await editPublication(post, editingBody.value.trim())
+  if (updated) {
+    const index = posts.value.findIndex(p => p.id === post.id)
+    if (index !== -1) {
+      posts.value[index] = { ...posts.value[index], body: updated.body || editingBody.value.trim() }
+    }
+  }
+  editingPostId.value = null
+  editingBody.value = ''
 }
 
 const fetchPosts = async () => {
@@ -223,6 +249,13 @@ const filteredPosts = computed(() => {
                 </button>
                 <div v-if="openMenuId === post.id"
                   class="absolute right-0 top-10 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-lg z-20 min-w-[140px] p-1">
+                  <button @click.stop="startEditing(post)"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-lg transition font-medium">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Modifier
+                  </button>
                   <button @click.stop="handleDeletePost(post)"
                     class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition font-medium">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -243,7 +276,21 @@ const filteredPosts = computed(() => {
             </div>
 
             <!-- Body -->
-            <p v-if="post.body" class="text-gray-700 dark:text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap mb-4">{{ post.body }}</p>
+            <div v-if="editingPostId === post.id" class="mb-4">
+              <textarea v-model="editingBody" rows="3"
+                class="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none resize-none transition-all"></textarea>
+              <div class="flex items-center gap-2 mt-2 justify-end">
+                <button @click="cancelEditing"
+                  class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 bg-gray-100 dark:bg-zinc-800 rounded-lg transition-colors">
+                  Annuler
+                </button>
+                <button @click="saveEditing(post)" :disabled="!editingBody.trim()"
+                  class="px-3 py-1.5 text-xs font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+            <p v-else-if="post.body" class="text-gray-700 dark:text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap mb-4">{{ post.body }}</p>
 
             <!-- Actions -->
             <div class="flex items-center gap-4 pt-3 border-t border-gray-100 dark:border-zinc-800/60">
