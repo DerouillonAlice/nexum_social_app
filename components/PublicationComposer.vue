@@ -87,10 +87,10 @@ const canSubmit = computed(() => {
 </script>
 
 <template>
-    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-gray-200/60 dark:border-zinc-800/60">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-gray-200/60 dark:border-zinc-800/60" role="form" aria-label="Composer une publication">
         <div class="flex flex-col gap-3">
             <div v-if="showChannelSelector" class="relative">
-                <select v-model="selectedChannel"
+                <select v-model="selectedChannel" aria-label="Sélectionner un salon"
                     class="appearance-none bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 pr-8 text-xs font-medium text-zinc-600 dark:text-zinc-400 focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500/40 cursor-pointer transition">
                     <option :value="null" disabled>Sélectionner un salon</option>
                     <option v-for="channel in channels" :key="channel.id" :value="channel">
@@ -107,6 +107,7 @@ const canSubmit = computed(() => {
             <div class="flex items-start gap-3">
                 <UserAvatar :user="$pinia.state.value.auth?.user" sizeClass="h-9 w-9 rounded-full" />
                 <textarea v-model="content" :placeholder="props.placeholder" rows="2"
+                    aria-label="Contenu de la publication"
                     class="flex-1 bg-transparent border-none p-0 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 resize-none leading-relaxed"
                     :disabled="isSending" @keydown.enter.ctrl.exact="handleSubmit"
                     @keydown.enter.meta.exact="handleSubmit"></textarea>
@@ -116,6 +117,7 @@ const canSubmit = computed(() => {
                 <div class="relative h-24 w-24 rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800">
                     <img :src="filePreview" class="w-full h-full object-cover" />
                     <button @click="removeFile" type="button"
+                        aria-label="Retirer l'image sélectionnée"
                         class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -127,6 +129,7 @@ const canSubmit = computed(() => {
             <div class="flex items-center justify-between ml-12">
                 <div class="flex items-center gap-1">
                     <button type="button" @click="fileInput.click()"
+                        aria-label="Ajouter une image à la publication"
                         class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors flex items-center gap-1.5"
                         title="Ajouter une image">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

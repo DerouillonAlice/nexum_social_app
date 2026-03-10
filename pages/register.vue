@@ -93,12 +93,12 @@ py-8 relative overflow-hidden overflow-y-auto transition-colors duration-300">
             class="text-zinc-700 dark:text-zinc-300 font-semibold">Nexum</span></p>
       </div>
 
-      <form @submit.prevent="handleRegister" class="space-y-5">
+      <form @submit.prevent="handleRegister" class="space-y-5" aria-label="Formulaire d'inscription">
 
-        <div v-if="error"
+        <div v-if="error" role="alert" aria-live="assertive"
           class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 
 text-red-600 dark:text-red-400 text-sm p-4 rounded-xl flex items-start gap-3">
-          <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -106,37 +106,37 @@ text-red-600 dark:text-red-400 text-sm p-4 rounded-xl flex items-start gap-3">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Avatar (Optionnel)</label>
+          <label for="register-avatar" class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Avatar (Optionnel)</label>
           <div class="relative group">
-            <input type="file" accept="image/*" @change="handleAvatarChange"
+            <input id="register-avatar" type="file" accept="image/*" @change="handleAvatarChange"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-gray-900 dark:text-zinc-100 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-700 dark:file:text-zinc-300 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 cursor-pointer focus:ring-2 focus:ring-zinc-500/30 outline-none transition-all" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Nom d'affichage</label>
+          <label for="register-displayname" class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Nom d'affichage</label>
           <div class="relative group">
-            <input v-model="displayName" type="text" required
+            <input id="register-displayname" v-model="displayName" type="text" required autocomplete="name"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-zinc-600"
               placeholder="Ex: Alice" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Adresse
+          <label for="register-email" class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Adresse
             Email</label>
           <div class="relative group">
-            <input v-model="email" type="email" required
+            <input id="register-email" v-model="email" type="email" required autocomplete="email"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-zinc-600"
               placeholder="alice@exemple.com" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Mot de
+          <label for="register-password" class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Mot de
             passe</label>
           <div class="relative group">
-            <input v-model="password" type="password" required minlength="4"
+            <input id="register-password" v-model="password" type="password" required minlength="4" autocomplete="new-password"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-zinc-600"
               placeholder="••••••••" />
           </div>

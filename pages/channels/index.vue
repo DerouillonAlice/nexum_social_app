@@ -156,7 +156,7 @@ const handleDeleteChannel = async () => {
             <!-- Favorites section -->
             <div v-if="filteredChannels.some(c => isFavorite(c.id))">
               <div class="px-6 pt-4 pb-2">
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Favoris</h3>
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Favoris</h3>
               </div>
               <div class="space-y-px">
                 <NuxtLink v-for="channel in filteredChannels.filter(c => isFavorite(c.id))" :key="'fav-' + channel.id"
@@ -195,13 +195,13 @@ const handleDeleteChannel = async () => {
             <!-- All channels -->
             <div>
               <div class="px-6 pt-4 pb-2">
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
                   {{ searchQuery.trim() ? 'Résultats' : 'Tous les salons' }}
                 </h3>
               </div>
 
               <div v-if="filteredChannels.length === 0" class="px-6 py-8 text-center">
-                <p class="text-sm text-gray-400 dark:text-zinc-600">Aucun salon trouvé pour « {{ searchQuery }} »</p>
+                <p class="text-sm text-gray-500 dark:text-zinc-400">Aucun salon trouvé pour « {{ searchQuery }} »</p>
               </div>
 
               <div v-else class="space-y-px">
@@ -217,13 +217,13 @@ const handleDeleteChannel = async () => {
                           <span class="text-gray-400 dark:text-zinc-500 font-normal">#</span> {{ channel.name }}
                         </span>
                       </div>
-                      <p class="text-xs text-gray-400 dark:text-zinc-600 truncate mt-0.5">
+                      <p class="text-xs text-gray-500 dark:text-zinc-400 truncate mt-0.5">
                         {{ channel.description || 'Aucune description' }}
                       </p>
                     </div>
                   </NuxtLink>
 
-                  <span class="text-[11px] text-gray-400 dark:text-zinc-600 shrink-0 hidden sm:block">{{ formatDate(channel.createdAt) }}</span>
+                  <span class="text-[11px] text-gray-500 dark:text-zinc-400 shrink-0 hidden sm:block">{{ formatDate(channel.createdAt) }}</span>
 
                   <button v-if="isChannelOwner(channel)" @click.stop="channelToDelete = channel"
                     class="p-1.5 rounded-lg transition shrink-0 text-gray-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"

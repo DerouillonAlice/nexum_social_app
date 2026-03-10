@@ -45,12 +45,12 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="space-y-5">
+      <form @submit.prevent="handleSubmit" class="space-y-5" aria-label="Formulaire de connexion">
         <div>
-          <label
+          <label for="login-email"
             class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Email</label>
           <div class="relative group">
-            <input v-model="email" type="email" required
+            <input id="login-email" v-model="email" type="email" required autocomplete="email"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-zinc-600"
               placeholder="votre@email.com" />
           </div>
@@ -58,19 +58,19 @@ const handleSubmit = async () => {
 
         <div>
           <div class="flex justify-between items-center mb-2">
-            <label class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Mot de
+            <label for="login-password" class="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Mot de
               passe</label>
           </div>
           <div class="relative group">
-            <input v-model="password" type="password" required
+            <input id="login-password" v-model="password" type="password" required autocomplete="current-password"
               class="w-full bg-gray-50 dark:bg-zinc-950/80 border border-gray-200 dark:border-zinc-700/50 rounded-xl px-4 py-3.5 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-2 focus:ring-zinc-500/30 focus:border-zinc-500/50 outline-none transition-all group-hover:border-gray-300 dark:group-hover:border-zinc-600"
               placeholder="••••••••" />
           </div>
         </div>
 
-        <div v-if="errorMsg"
+        <div v-if="errorMsg" role="alert" aria-live="assertive"
           class="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm text-center flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>

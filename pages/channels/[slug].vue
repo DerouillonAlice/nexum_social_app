@@ -173,7 +173,7 @@ const handleDeleteChannel = async () => {
               <span class="text-gray-400 dark:text-zinc-500">#</span>
               {{ channel?.name || channelSlug }}
             </h1>
-            <p v-if="channel?.description" class="text-[11px] text-gray-400 dark:text-zinc-600 truncate">{{ channel.description }}</p>
+            <p v-if="channel?.description" class="text-[11px] text-gray-500 dark:text-zinc-400 truncate">{{ channel.description }}</p>
           </div>
 
           <div class="flex items-center gap-1 shrink-0">
@@ -210,7 +210,7 @@ const handleDeleteChannel = async () => {
                 <p class="text-xs text-gray-500 dark:text-zinc-500 mt-0.5">
                   {{ channel?.description || 'Aucune description' }}
                 </p>
-                <p class="text-[11px] text-gray-400 dark:text-zinc-600 mt-1.5">
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1.5">
                   {{ messages.length }} message{{ messages.length !== 1 ? 's' : '' }}
                 </p>
               </div>
@@ -239,7 +239,7 @@ const handleDeleteChannel = async () => {
             <h3 class="text-base font-semibold text-gray-900 dark:text-zinc-100 mb-1">
               Bienvenue dans #{{ channel?.name }}
             </h3>
-            <p class="text-sm text-gray-400 dark:text-zinc-600 max-w-xs">
+            <p class="text-sm text-gray-500 dark:text-zinc-400 max-w-xs">
               C'est le début de ce salon. Envoyez le premier message !
             </p>
           </div>
@@ -249,7 +249,7 @@ const handleDeleteChannel = async () => {
               <!-- Date separator -->
               <div v-if="shouldShowDateSeparator(index)" class="flex items-center gap-3 my-5 first:mt-0">
                 <div class="flex-1 h-px bg-gray-200/60 dark:bg-zinc-800/60"></div>
-                <span class="text-[11px] font-medium text-gray-400 dark:text-zinc-600 shrink-0">
+                <span class="text-[11px] font-medium text-gray-500 dark:text-zinc-400 shrink-0">
                   {{ formatDateSeparator(msg.createdAt) }}
                 </span>
                 <div class="flex-1 h-px bg-gray-200/60 dark:bg-zinc-800/60"></div>
@@ -262,7 +262,7 @@ const handleDeleteChannel = async () => {
                 <!-- Avatar or spacer -->
                 <div class="w-9 shrink-0">
                   <UserAvatar v-if="!shouldGroupWithPrevious(index)" :user="msg.author" sizeClass="h-9 w-9" />
-                  <span v-else class="text-[10px] text-gray-400 dark:text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity text-center block pt-1">
+                  <span v-else class="text-[10px] text-gray-500 dark:text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity text-center block pt-1">
                     {{ formatTime(msg.createdAt) }}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ const handleDeleteChannel = async () => {
                     <span class="text-sm font-semibold" :class="isMe(msg.author) ? 'text-zinc-900 dark:text-zinc-100' : 'text-gray-900 dark:text-zinc-100'">
                       {{ isMe(msg.author) ? 'Vous' : getUserName(msg.author) }}
                     </span>
-                    <span class="text-[11px] text-gray-400 dark:text-zinc-600">{{ formatTime(msg.createdAt) }}</span>
+                    <span class="text-[11px] text-gray-500 dark:text-zinc-400">{{ formatTime(msg.createdAt) }}</span>
                   </div>
 
                   <!-- Message body -->
@@ -346,7 +346,7 @@ const handleDeleteChannel = async () => {
             </div>
           </div>
 
-          <p class="text-center text-[11px] text-gray-400 dark:text-zinc-700 mt-1.5">
+          <p class="text-center text-[11px] text-gray-500 dark:text-zinc-500 mt-1.5">
             Entrée pour envoyer · Maj+Entrée pour un retour à la ligne
           </p>
         </footer>

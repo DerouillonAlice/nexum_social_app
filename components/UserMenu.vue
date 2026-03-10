@@ -33,7 +33,10 @@ onMounted(() => {
 <template>
     <div class="relative">
         <button id="user-menu-trigger" @click="toggleMenu"
-            class="flex items-center gap-2 cursor-pointer focus:outline-none p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+            class="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-500/50 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Menu utilisateur"
+            :aria-expanded="isMenuOpen"
+            aria-haspopup="true">
             <UserAvatar :user="user" sizeClass="h-8 w-8" />
             <span class="text-sm font-medium text-gray-700 dark:text-zinc-200 hidden md:block">{{ user.name }}</span>
             <svg class="h-4 w-4 text-gray-400 dark:text-zinc-500 transition-transform duration-200"
@@ -43,13 +46,17 @@ onMounted(() => {
         </button>
 
         <div v-if="isMenuOpen" id="user-menu-dropdown"
-            class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 py-1 overflow-hidden"
+            role="menu"
+            aria-label="Options du compte">
             <NuxtLink to="/settings"
                 class="block px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                role="menuitem"
                 @click="isMenuOpen = false">Paramètres</NuxtLink>
-            <div class="border-t border-gray-100 dark:border-zinc-800 my-1"></div>
+            <div class="border-t border-gray-100 dark:border-zinc-800 my-1" role="separator"></div>
             <button @click="logout"
-                class="w-full text-left px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                class="w-full text-left px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                role="menuitem">
                 Se déconnecter
             </button>
         </div>
