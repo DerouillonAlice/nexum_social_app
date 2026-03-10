@@ -33,7 +33,7 @@
 | CSS | [Tailwind CSS v4](https://tailwindcss.com) via `@tailwindcss/postcss` |
 | Tests unitaires | [Vitest 4](https://vitest.dev) + `@vue/test-utils` + jsdom |
 | Tests E2E | [Cypress 15](https://cypress.io) |
-| API Backend | REST / JSON-LD (Hydra) — `wra506d.davidannebicque.ovh/api` |
+| API Backend | REST / JSON-LD (Hydra) |
 
 ## Structure du projet
 
@@ -83,11 +83,11 @@ cd nexum_social_app
 npm install
 ```
 
-Créer un fichier `.env` à la racine :
+Créer un fichier `.env` à la racine (voir `.env.example`) :
 
 ```env
-API_BASE_URL=https://wra506d.davidannebicque.ovh/api
-API_SLUG=ws-e
+API_BASE_URL=https://votre-api.example.com/api
+API_SLUG=votre-slug
 ```
 
 ## Commandes
